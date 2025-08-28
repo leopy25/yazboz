@@ -166,7 +166,7 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxzyxDGjMIf8Oed_1e9B9jTIppL706zMG8Q7fUZdYzMjNTDhEjNh7fp8GME8rnT667obA/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyCBkpzzpA83WfOTFh0Le0pafwYEFYjSz8cXAl1oBXRUxx3-W5Cy7ZI_xEfrj1kIUBN/exec';
 
         document.getElementById('zettelButton').addEventListener('click', function() {
             document.getElementById('selectionSection').style.display = 'block';
@@ -262,8 +262,7 @@
             materialData["R-Kod"] = rCode;
             materialData["Eklenme Tarihi"] = new Date().toLocaleString('tr-TR');
             materialData["Alıntılar"] = [];
-            materialData["action"] = "saveMaterial"; // API'ye hangi işlemi yapacağını söylüyoruz
-
+            
             fetch(API_URL, {
                 method: 'POST',
                 headers: {

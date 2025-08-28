@@ -116,7 +116,7 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxzyxDGjMIf8Oed_1e9B9jTIppL706zMG8Q7fUZdYzMjNTDhEjNh7fp8GME8rnT667obA/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyCBkpzzpA83WfOTFh0Le0pafwYEFYjSz8cXAl1oBXRUxx3-W5Cy7ZI_xEfrj1kIUBN/exec';
         let materials = [];
         let sortDirection = {};
 
@@ -207,11 +207,11 @@
         function deleteMaterial(rCode) {
             if (confirm(`"${rCode}" kodlu materyali ve tüm alıntılarını silmek istediğinizden emin misiniz?`)) {
                 fetch(API_URL, {
-                    method: 'POST', // DELETE yerine POST kullanıyoruz
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ rCode: rCode, action: 'delete' }), // DELETE isteği
+                    body: JSON.stringify({ rCode: rCode, action: 'delete' }),
                 })
                 .then(response => response.json())
                 .then(result => {

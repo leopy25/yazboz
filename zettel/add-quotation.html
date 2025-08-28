@@ -136,7 +136,7 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxzyxDGjMIf8Oed_1e9B9jTIppL706zMG8Q7fUZdYzMjNTDhEjNh7fp8GME8rnT667obA/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyCBkpzzpA83WfOTFh0Le0pafwYEFYjSz8cXAl1oBXRUxx3-W5Cy7ZI_xEfrj1kIUBN/exec';
         const urlParams = new URLSearchParams(window.location.search);
         const rCode = urlParams.get('rCode');
         const quotIndex = urlParams.get('quotIndex');
@@ -301,7 +301,7 @@
                     }
                     material['Alıntılar'].push(quotationData);
                 }
-                material.action = 'saveMaterial'; // API'ye hangi işlemi yapacağını söylüyoruz
+                
                 fetch(API_URL, {
                     method: 'POST',
                     headers: {
@@ -336,7 +336,7 @@
         function deleteQuotation(index) {
             if (confirm("Bu alıntıyı silmek istediğinizden emin misiniz?")) {
                 material['Alıntılar'].splice(index, 1);
-                material.action = 'saveMaterial'; // API'ye hangi işlemi yapacağını söylüyoruz
+                
                 fetch(API_URL, {
                     method: 'POST',
                     headers: {
