@@ -1,0 +1,11 @@
+{
+  "name": "hulerum-app",
+  "version": "1.0.0",
+  "description": "Zettelkasten App for Hulerum",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "mongodb": "^4.0.0"
+  }
+}
