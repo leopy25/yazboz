@@ -110,6 +110,7 @@
         </div>
     </div>
     <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxzyxDGjMIf8Oed_1e9B9jTIppL706zMG8Q7fUZdYzMjNTDhEjNh7fp8GME8rnT667obA/exec';
         let materials = [];
         let keywords = [];
         const keywordPositions = JSON.parse(localStorage.getItem('keywordPositions')) || {};
@@ -138,11 +139,11 @@
         });
 
         function fetchMaterialsAndRenderMap() {
-            fetch('/api/get-materials.js', { method: 'GET' })
+            fetch(API_URL, { method: 'GET' })
                 .then(response => response.json())
                 .then(data => {
                     if (Array.isArray(data)) {
-                        materials = data;
+                        materials = data.map(item => JSON.parse(item.Veri));
                         let allKeywords = [];
                         materials.forEach(material => {
                             if (material['Alıntılar']) {

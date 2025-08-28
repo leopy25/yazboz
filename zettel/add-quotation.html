@@ -136,6 +136,7 @@
     </div>
 
     <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxzyxDGjMIf8Oed_1e9B9jTIppL706zMG8Q7fUZdYzMjNTDhEjNh7fp8GME8rnT667obA/exec';
         const urlParams = new URLSearchParams(window.location.search);
         const rCode = urlParams.get('rCode');
         const quotIndex = urlParams.get('quotIndex');
@@ -171,20 +172,12 @@
         });
 
         function fetchMaterialsAndRender() {
-            fetch('/api/get-materials', {
-                method: 'GET',
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => { throw new Error(text) });
-                }
-                return response.json();
-            })
+            fetch(API_URL, { method: 'GET' })
+            .then(response => response.json())
             .then(data => {
                 if(Array.isArray(data)) {
-                    materials = data;
+                    materials = data.map(item => JSON.parse(item.Veri));
                     material = materials.find(mat => mat['R-Kod'] === rCode);
-
                     if (quotIndex !== null) {
                         document.getElementById('view-quotation-section').style.display = 'block';
                         if (material && material['Alıntılar'] && material['Alıntılar'][quotIndex]) {
@@ -199,12 +192,12 @@
                     }
                 } else {
                     console.error('Veri çekme hatası:', data.message);
-                    alert('Veriler yüklenirken bir hata oluştu: ' + data.message);
+                    alert('Veriler yüklenirken bir hata oluştu.');
                 }
             })
             .catch(error => {
                 console.error('API isteğinde hata:', error);
-                alert('İstek sırasında bir hata oluştu: ' + error.message);
+                alert('İstek sırasında bir hata oluştu.');
             });
         }
         
@@ -267,30 +260,24 @@
         
         function addKeyword() {
             const selection = window.getSelection();
-            selectedText = selection.toString().trim();
-            if (selectedText.length > 0) {
-                const range = selection.getRangeAt(0).getBoundingClientRect();
-                keywordPopup.style.display = 'block';
-                keywordPopup.style.top = `${e.pageY + 10}px`;
-                keywordPopup.style.left = `${e.pageX}px`;
-            } else {
-                keywordPopup.style.display = 'none';
-            }
+            const range = selection.getRangeAt(0);
             
-            const stem = findStem(selectedText);
+            if (selectedText.length > 0) {
+                const stem = findStem(selectedText);
                 
-            const newSpan = document.createElement('span');
-            newSpan.className = 'keyword-link';
-            newSpan.dataset.keyword = selectedText;
-            newSpan.textContent = selectedText;
+                const newSpan = document.createElement('span');
+                newSpan.className = 'keyword-link';
+                newSpan.dataset.keyword = selectedText;
+                newSpan.textContent = selectedText;
 
-            range.deleteContents();
-            range.insertNode(newSpan);
-            keywordPopup.style.display = 'none';
+                range.deleteContents();
+                range.insertNode(newSpan);
+                keywordPopup.style.display = 'none';
 
-            if (!keywords.includes(stem)) {
-                keywords.push(stem);
-                localStorage.setItem('keywords', JSON.stringify(keywords));
+                if (!keywords.includes(stem)) {
+                    keywords.push(stem);
+                    localStorage.setItem('keywords', JSON.stringify(keywords));
+                }
             }
         }
         
@@ -314,20 +301,15 @@
                     }
                     material['Alıntılar'].push(quotationData);
                 }
-
-                fetch('/api/save-material', {
+                material.action = 'saveMaterial'; // API'ye hangi işlemi yapacağını söylüyoruz
+                fetch(API_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(material),
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.text().then(text => { throw new Error(text) });
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(result => {
                     if (result.success) {
                         alert(`Alıntı başarıyla kaydedildi.`);
@@ -342,7 +324,7 @@
                 })
                 .catch(error => {
                     console.error('API isteğinde hata:', error);
-                    alert('İstek sırasında bir hata oluştu: ' + error.message);
+                    alert('İstek sırasında bir hata oluştu.');
                 });
             }
         }
@@ -354,20 +336,15 @@
         function deleteQuotation(index) {
             if (confirm("Bu alıntıyı silmek istediğinizden emin misiniz?")) {
                 material['Alıntılar'].splice(index, 1);
-
-                fetch('/api/save-material', {
+                material.action = 'saveMaterial'; // API'ye hangi işlemi yapacağını söylüyoruz
+                fetch(API_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(material),
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.text().then(text => { throw new Error(text) });
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(result => {
                     if (result.success) {
                         alert(`Alıntı başarıyla silindi.`);
@@ -378,7 +355,7 @@
                 })
                 .catch(error => {
                     console.error('API isteğinde hata:', error);
-                    alert('İstek sırasında bir hata oluştu: ' + error.message);
+                    alert('İstek sırasında bir hata oluştu.');
                 });
             }
         }
