@@ -154,7 +154,6 @@
         let selectedText = '';
         let keywords = JSON.parse(localStorage.getItem('keywords')) || [];
 
-        // Kelime kökü bulma fonksiyonu (basit bir örnek)
         function findStem(word) {
             word = word.toLowerCase();
             const suffixes = ['leri', 'ler', 'lar', 'in', 'un', 'in', 'un', 'den', 'dan', 'a', 'e', 'si', 'ci', 'ciği', 'cığı', 'mak', 'mek'];
