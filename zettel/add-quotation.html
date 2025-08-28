@@ -154,9 +154,20 @@
         let selectedText = '';
         let keywords = JSON.parse(localStorage.getItem('keywords')) || [];
 
+        // Kelime kökü bulma fonksiyonu (basit bir örnek)
+        function findStem(word) {
+            word = word.toLowerCase();
+            const suffixes = ['leri', 'ler', 'lar', 'in', 'un', 'in', 'un', 'den', 'dan', 'a', 'e', 'si', 'ci', 'ciği', 'cığı', 'mak', 'mek'];
+            for (const suffix of suffixes) {
+                if (word.endsWith(suffix)) {
+                    return word.slice(0, -suffix.length);
+                }
+            }
+            return word;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             if (quotIndex !== null) {
-                // Sadece görüntüleme modunda
                 document.getElementById('view-quotation-section').style.display = 'block';
                 if (material && material['Alıntılar'] && material['Alıntılar'][quotIndex]) {
                     currentQuotation = material['Alıntılar'][quotIndex];
@@ -165,7 +176,6 @@
                     document.getElementById('quotation-container').innerHTML = '<p>Alıntı bulunamadı.</p>';
                 }
             } else {
-                // Ekleme/Düzenleme modunda
                 document.getElementById('add-edit-form-section').style.display = 'block';
                 renderAllQuotations();
             }
@@ -184,21 +194,21 @@
             }
         });
 
-        // Alıntıları HTML formatında linkleyen fonksiyon
         function applyKeywords(text) {
             let tempDiv = document.createElement('div');
             tempDiv.innerHTML = text;
             let tempText = tempDiv.innerText;
 
             keywords.forEach(keyword => {
-                const regex = new RegExp(`(?![^<]*>)\\b(${keyword})\\b`, 'gi');
-                tempText = tempText.replace(regex, `<span class="keyword-link" data-keyword="${keyword}">${keyword}</span>`);
+                // Hem kök hem de türemiş hallerini kontrol eden regex
+                const stem = findStem(keyword);
+                const regex = new RegExp(`(?![^<]*>)\\b(${stem}\\w*)\\b`, 'gi');
+                tempText = tempText.replace(regex, `<span class="keyword-link" data-keyword="${keyword}">$1</span>`);
             });
             tempDiv.innerHTML = tempText;
             return tempDiv.innerHTML;
         }
 
-        // Sadece tek bir alıntıyı gösteren fonksiyon (haritadan gelenler için)
         function renderSingleQuotation(quotation) {
             const container = document.getElementById('quotation-container');
             container.innerHTML = `
@@ -209,7 +219,6 @@
             `;
         }
 
-        // Tüm alıntıları listeleyen fonksiyon (listeden gelenler için)
         function renderAllQuotations() {
             const container = document.getElementById('quotation-list-container');
             container.innerHTML = '<h2>Mevcut Alıntılar</h2>';
@@ -235,6 +244,8 @@
             const range = selection.getRangeAt(0);
             
             if (selectedText.length > 0) {
+                const stem = findStem(selectedText);
+                
                 const newSpan = document.createElement('span');
                 newSpan.className = 'keyword-link';
                 newSpan.dataset.keyword = selectedText;
@@ -244,8 +255,8 @@
                 range.insertNode(newSpan);
                 keywordPopup.style.display = 'none';
 
-                if (!keywords.includes(selectedText)) {
-                    keywords.push(selectedText);
+                if (!keywords.includes(stem)) {
+                    keywords.push(stem);
                     localStorage.setItem('keywords', JSON.stringify(keywords));
                 }
             }
@@ -255,7 +266,6 @@
             const pageNumber = pageNumberInput.value;
             let quotationContent = quotationTextElement.innerHTML;
 
-            // HTML etiketlerini dönüştürme
             quotationContent = quotationContent.replace(/<span class="keyword-link" data-keyword="(.*?)".*?>(.*?)<\/span>/g, `<a href="#" data-keyword="$1">$2</a>`);
 
             if (material) {
@@ -328,12 +338,9 @@
         }
 
         function finishViewing() {
-            // URL'de bir parametre olup olmadığını kontrol et
             if (urlParams.has('rCode') && urlParams.has('quotIndex')) {
-                // Eğer haritadan geldiyse, keywords sayfasına dön
                 window.location.href = 'keywords.html';
             } else {
-                // Eğer listeden geldiyse, list sayfasına dön
                 window.location.href = 'list.html';
             }
         }
