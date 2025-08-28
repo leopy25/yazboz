@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alıntı Ekle</title>
+    <title>Alıntı Ekle/Düzenle</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -87,6 +87,14 @@
         .quotation-card .actions {
             text-align: right;
         }
+
+        #view-quotation-section {
+            display: none;
+        }
+
+        #add-edit-form-section {
+            display: none;
+        }
         
         .keyword-link {
             color: #007bff;
@@ -97,30 +105,40 @@
 </head>
 <body>
     <div class="container">
-        <h1>Alıntı Ekle</h1>
+        <h1>Alıntı İşlemleri</h1>
         <p>Materyal R-Kodu: <strong id="rCodeDisplay"></strong></p>
 
-        <div id="quotation-list-container"></div>
-        <h2>Yeni Alıntı Ekle</h2>
-        <div class="form-group">
-            <label for="pageNumber">Sayfa Numarası:</label>
-            <input type="text" id="pageNumber">
+        <div id="view-quotation-section">
+            <div id="quotation-container"></div>
+            <button onclick="copyQuotation()">Alıntıyı Kopyala</button>
+            <button onclick="finishViewing()">Bitti</button>
         </div>
-        <div class="form-group">
-            <label for="quotationText">Alıntı:</label>
-            <div id="quotationText" class="quotation-area" contenteditable="true"></div>
-        </div>
-        <button id="saveButton" onclick="saveQuotation()">Kaydet</button>
-        <button onclick="finishEditing()">Bitti</button>
 
-        <div id="keywordPopup" class="keyword-popup">
-            <button onclick="addKeyword()">Anahtar Kelime Ekle</button>
+        <div id="add-edit-form-section">
+            <button onclick="goBackToList()" class="button">Geri</button>
+            <div id="quotation-list-container"></div>
+            <h2>Yeni Alıntı Ekle</h2>
+            <div class="form-group">
+                <label for="pageNumber">Sayfa Numarası:</label>
+                <input type="text" id="pageNumber">
+            </div>
+            <div class="form-group">
+                <label for="quotationText">Alıntı:</label>
+                <div id="quotationText" class="quotation-area" contenteditable="true"></div>
+            </div>
+            <button id="saveButton" onclick="saveQuotation()">Kaydet</button>
+            <button onclick="finishEditing()">Bitti</button>
+
+            <div id="keywordPopup" class="keyword-popup">
+                <button onclick="addKeyword()">Anahtar Kelime Ekle</button>
+            </div>
         </div>
     </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const rCode = urlParams.get('rCode');
+        const quotIndex = urlParams.get('quotIndex');
         
         document.getElementById('rCodeDisplay').innerText = rCode;
 
@@ -128,6 +146,8 @@
         const material = materials.find(mat => mat['R-Kod'] === rCode);
         
         let editingIndex = null;
+        let currentQuotation = null;
+
         const pageNumberInput = document.getElementById('pageNumber');
         const quotationTextElement = document.getElementById('quotationText');
         const keywordPopup = document.getElementById('keywordPopup');
@@ -147,7 +167,18 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            renderAllQuotations();
+            if (quotIndex !== null) {
+                document.getElementById('view-quotation-section').style.display = 'block';
+                if (material && material['Alıntılar'] && material['Alıntılar'][quotIndex]) {
+                    currentQuotation = material['Alıntılar'][quotIndex];
+                    renderSingleQuotation(currentQuotation);
+                } else {
+                    document.getElementById('quotation-container').innerHTML = '<p>Alıntı bulunamadı.</p>';
+                }
+            } else {
+                document.getElementById('add-edit-form-section').style.display = 'block';
+                renderAllQuotations();
+            }
         });
         
         quotationTextElement.addEventListener('mouseup', function(e) {
@@ -175,6 +206,16 @@
             });
             tempDiv.innerHTML = tempText;
             return tempDiv.innerHTML;
+        }
+
+        function renderSingleQuotation(quotation) {
+            const container = document.getElementById('quotation-container');
+            container.innerHTML = `
+                <div class="quotation-card">
+                    <p><strong>Sayfa:</strong> [${quotation.sayfa}]</p>
+                    <p>${applyKeywords(quotation.metin)}</p>
+                </div>
+            `;
         }
 
         function renderAllQuotations() {
@@ -268,6 +309,14 @@
                     saveButton.innerText = "Kaydet";
                 }
             }
+        }
+
+        function goBackToList() {
+            window.location.href = 'list.html';
+        }
+
+        function finishViewing() {
+            window.location.href = 'list.html';
         }
 
         function finishEditing() {
