@@ -261,17 +261,34 @@
             materialData["Eklenme Tarihi"] = new Date().toLocaleString('tr-TR');
             materialData["Alıntılar"] = [];
 
-            let materials = JSON.parse(localStorage.getItem('materials')) || [];
-            materials.push(materialData);
-            
-            localStorage.setItem('materials', JSON.stringify(materials));
-            
-            alert(`Materyal "${materialData["R-Kod"]}" adıyla kaydedildi.`);
-
-            document.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
-            document.getElementById('selectionSection').style.display = 'none';
-            document.getElementById(type + 'Form').style.display = 'none';
-            window.location.href = 'list.html';
+            // API'ye POST isteği gönder
+            fetch('api.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(materialData),
+            })
+            .then(response => response.json())
+            .then(result => {
+                if(result.success) {
+                    alert(`Materyal "${materialData["R-Kod"]}" adıyla başarıyla kaydedildi.`);
+                    
+                    // Formu sıfırla
+                    document.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
+                    document.getElementById('selectionSection').style.display = 'none';
+                    document.getElementById(type + 'Form').style.display = 'none';
+                    
+                    // İşlem bitince listeye yönlendir
+                    window.location.href = 'list.html';
+                } else {
+                    alert('Hata: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('API isteğinde hata:', error);
+                alert('İstek sırasında bir hata oluştu.');
+            });
         }
     </script>
 </body>
