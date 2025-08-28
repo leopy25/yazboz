@@ -130,12 +130,12 @@
                 const row = document.createElement('tr');
                 const eserAdi = material['Makale Adı'] || material['Kitap Adı'] || material['Bölüm Başlığı'] || '';
                 row.innerHTML = `
-                    <td><a href="add-quotation.html?rCode=${material['R-Kod']}" title="Alıntıları görüntüle/düzenle">${material['R-Kod']}</a></td>
+                    <td><a href="add-quotation.html?rCode=${material['R-Kod']}&mode=edit" title="Alıntıları görüntüle/düzenle">${material['R-Kod']}</a></td>
                     <td>${material['Yazar Adı-Soyadı'] || material['Sorumlu Yazarın Adı'] || ''}</td>
                     <td>${eserAdi}</td>
                     <td>${material['Materyal Türü']}</td>
                     <td>${material['Eklenme Tarihi']}</td>
-                    <td><button onclick="addQuotation('${material['R-Kod']}')">Alıntı Ekle</button></td>
+                    <td><a href="add-quotation.html?rCode=${material['R-Kod']}" class="button">Alıntı Ekle</a></td>
                     <td><button class="delete" onclick="deleteMaterial('${material['R-Kod']}')">Sil</button></td>
                 `;
                 tableBody.appendChild(row);
@@ -180,10 +180,6 @@
             });
 
             renderTable(sortedMaterials);
-        }
-
-        function addQuotation(rCode) {
-            window.location.href = `add-quotation.html?rCode=${rCode}`;
         }
 
         function deleteMaterial(rCode) {

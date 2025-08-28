@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alıntı Ekle</title>
+    <title>Alıntı Düzenle</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -54,9 +54,8 @@
             background-color: #dc3545;
         }
 
-        button.edit {
-            background-color: #ffc107;
-            color: black;
+        button.update {
+            background-color: #28a745;
         }
 
         .keyword-popup {
@@ -69,24 +68,6 @@
             display: none;
             z-index: 1000;
         }
-
-        .quotation-card {
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            background-color: #fafafa;
-        }
-        
-        .quotation-card p {
-            margin: 0;
-            margin-bottom: 10px;
-            white-space: pre-wrap;
-        }
-
-        .quotation-card .actions {
-            text-align: right;
-        }
         
         .keyword-link {
             color: #007bff;
@@ -97,21 +78,21 @@
 </head>
 <body>
     <div class="container">
-        <h1>Alıntı Ekle</h1>
+        <h1>Alıntı Düzenle</h1>
         <p>Materyal R-Kodu: <strong id="rCodeDisplay"></strong></p>
 
-        <div id="quotation-list-container"></div>
-        <h2>Yeni Alıntı Ekle</h2>
         <div class="form-group">
             <label for="pageNumber">Sayfa Numarası:</label>
             <input type="text" id="pageNumber">
         </div>
+        
         <div class="form-group">
             <label for="quotationText">Alıntı:</label>
             <div id="quotationText" class="quotation-area" contenteditable="true"></div>
         </div>
-        <button id="saveButton" onclick="saveQuotation()">Kaydet</button>
-        <button onclick="finishEditing()">Bitti</button>
+        
+        <button onclick="updateQuotation()" class="update">Güncelle</button>
+        <button onclick="finishEditing()">Vazgeç</button>
 
         <div id="keywordPopup" class="keyword-popup">
             <button onclick="addKeyword()">Anahtar Kelime Ekle</button>
@@ -121,17 +102,17 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const rCode = urlParams.get('rCode');
+        const quotIndex = urlParams.get('quotIndex');
         
         document.getElementById('rCodeDisplay').innerText = rCode;
 
         const materials = JSON.parse(localStorage.getItem('materials')) || [];
         const material = materials.find(mat => mat['R-Kod'] === rCode);
         
-        let editingIndex = null;
         const pageNumberInput = document.getElementById('pageNumber');
         const quotationTextElement = document.getElementById('quotationText');
         const keywordPopup = document.getElementById('keywordPopup');
-        const saveButton = document.getElementById('saveButton');
+        
         let selectedText = '';
         let keywords = JSON.parse(localStorage.getItem('keywords')) || [];
 
@@ -147,7 +128,14 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            renderAllQuotations();
+            if (material && material['Alıntılar'] && material['Alıntılar'][quotIndex]) {
+                const quotationToEdit = material['Alıntılar'][quotIndex];
+                pageNumberInput.value = quotationToEdit.sayfa;
+                quotationTextElement.innerHTML = quotationToEdit.metin.replace(/<a href="#" data-keyword="(.*?)">(.*?)<\/a>/g, `<span class="keyword-link" data-keyword="$1">$2</span>`);
+            } else {
+                alert("Düzenlenecek alıntı bulunamadı.");
+                window.location.href = 'list.html';
+            }
         });
         
         quotationTextElement.addEventListener('mouseup', function(e) {
@@ -163,40 +151,6 @@
             }
         });
 
-        function applyKeywords(text) {
-            let tempDiv = document.createElement('div');
-            tempDiv.innerHTML = text;
-            let tempText = tempDiv.innerText;
-
-            keywords.forEach(keyword => {
-                const stem = findStem(keyword);
-                const regex = new RegExp(`(?![^<]*>)\\b(${stem}\\w*)\\b`, 'gi');
-                tempText = tempText.replace(regex, `<span class="keyword-link" data-keyword="${keyword}">$1</span>`);
-            });
-            tempDiv.innerHTML = tempText;
-            return tempDiv.innerHTML;
-        }
-
-        function renderAllQuotations() {
-            const container = document.getElementById('quotation-list-container');
-            container.innerHTML = '<h2>Mevcut Alıntılar</h2>';
-            if (material && material['Alıntılar']) {
-                material['Alıntılar'].forEach((q, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'quotation-card';
-                    card.innerHTML = `
-                        <p><strong>Sayfa:</strong> [${q.sayfa}]</p>
-                        <p>${applyKeywords(q.metin)}</p>
-                        <div class="actions">
-                            <button onclick="editQuotation('${rCode}', ${index})" class="edit">Düzenle</button>
-                            <button onclick="deleteQuotation(${index})" class="delete">Sil</button>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-            }
-        }
-        
         function addKeyword() {
             const selection = window.getSelection();
             const range = selection.getRangeAt(0);
@@ -220,7 +174,7 @@
             }
         }
         
-        function saveQuotation() {
+        function updateQuotation() {
             const pageNumber = pageNumberInput.value;
             let quotationContent = quotationTextElement.innerHTML;
 
@@ -232,41 +186,10 @@
                     "metin": quotationContent
                 };
 
-                if (editingIndex !== null) {
-                    material['Alıntılar'][editingIndex] = quotationData;
-                    alert(`Alıntı başarıyla güncellendi.`);
-                    editingIndex = null;
-                    saveButton.innerText = "Kaydet";
-                } else {
-                    if (!material['Alıntılar']) {
-                        material['Alıntılar'] = [];
-                    }
-                    material['Alıntılar'].push(quotationData);
-                    alert(`Yeni alıntı kaydedildi.`);
-                }
+                material['Alıntılar'][quotIndex] = quotationData;
                 localStorage.setItem('materials', JSON.stringify(materials));
-            }
-
-            pageNumberInput.value = '';
-            quotationTextElement.innerHTML = '';
-            renderAllQuotations();
-        }
-
-        function editQuotation(rCode, index) {
-            window.location.href = `edit-quotation.html?rCode=${rCode}&quotIndex=${index}`;
-        }
-
-        function deleteQuotation(index) {
-            if (confirm("Bu alıntıyı silmek istediğinizden emin misiniz?")) {
-                material['Alıntılar'].splice(index, 1);
-                localStorage.setItem('materials', JSON.stringify(materials));
-                renderAllQuotations();
-                if (editingIndex === index) {
-                    pageNumberInput.value = '';
-                    quotationTextElement.innerHTML = '';
-                    editingIndex = null;
-                    saveButton.innerText = "Kaydet";
-                }
+                alert(`Alıntı başarıyla güncellendi.`);
+                window.location.href = `add-quotation.html?rCode=${rCode}&mode=edit`;
             }
         }
 
