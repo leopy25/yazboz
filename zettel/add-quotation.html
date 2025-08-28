@@ -300,9 +300,9 @@
             quotationTextElement.innerHTML = quotationToEdit.metin.replace(/<a href="#" data-keyword="(.*?)">(.*?)<\/a>/g, `<span class="keyword-link" data-keyword="$1">$2</span>`);
             
             saveButton.innerText = "Güncelle";
-            // Sayfanın doğru konuma kaydırılması için
+            
             const targetElement = document.getElementById('add-edit-form-section');
-            targetElement.scrollIntoView({ behavior: 'smooth' });
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function deleteQuotation(index) {
