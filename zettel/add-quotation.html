@@ -194,13 +194,13 @@
             }
         });
 
+        // Alıntıları HTML formatında linkleyen fonksiyon
         function applyKeywords(text) {
             let tempDiv = document.createElement('div');
             tempDiv.innerHTML = text;
             let tempText = tempDiv.innerText;
 
             keywords.forEach(keyword => {
-                // Hem kök hem de türemiş hallerini kontrol eden regex
                 const stem = findStem(keyword);
                 const regex = new RegExp(`(?![^<]*>)\\b(${stem}\\w*)\\b`, 'gi');
                 tempText = tempText.replace(regex, `<span class="keyword-link" data-keyword="${keyword}">$1</span>`);
@@ -209,16 +209,18 @@
             return tempDiv.innerHTML;
         }
 
+        // Sadece tek bir alıntıyı gösteren fonksiyon (haritadan gelenler için)
         function renderSingleQuotation(quotation) {
             const container = document.getElementById('quotation-container');
             container.innerHTML = `
                 <div class="quotation-card">
                     <p><strong>Sayfa:</strong> [${quotation.sayfa}]</p>
-                    <p>${quotation.metin}</p>
+                    <p>${applyKeywords(quotation.metin)}</p>
                 </div>
             `;
         }
 
+        // Tüm alıntıları listeleyen fonksiyon (listeden gelenler için)
         function renderAllQuotations() {
             const container = document.getElementById('quotation-list-container');
             container.innerHTML = '<h2>Mevcut Alıntılar</h2>';
@@ -338,11 +340,7 @@
         }
 
         function finishViewing() {
-            if (urlParams.has('rCode') && urlParams.has('quotIndex')) {
-                window.location.href = 'keywords.html';
-            } else {
-                window.location.href = 'list.html';
-            }
+            window.location.href = 'list.html';
         }
 
         function finishEditing() {
