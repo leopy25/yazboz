@@ -1,8 +1,16 @@
 {
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/save-material"
+      "source": "/api/save-material",
+      "destination": "/api/save-material.js"
+    },
+    {
+      "source": "/api/get-materials",
+      "destination": "/api/get-materials.js"
+    },
+    {
+      "source": "/api/delete-material",
+      "destination": "/api/delete-material.js"
     }
   ]
 }

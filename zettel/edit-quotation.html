@@ -125,8 +125,13 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            fetch('/api/get-materials.js', { method: 'GET' })
-                .then(response => response.json())
+            fetch('/api/get-materials', { method: 'GET' })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text) });
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (Array.isArray(data)) {
                         const materials = data;
@@ -141,13 +146,13 @@
                             window.location.href = 'list.html';
                         }
                     } else {
-                        alert("Veriler yüklenirken bir hata oluştu.");
+                        alert("Veriler yüklenirken bir hata oluştu: " + data.message);
                         window.location.href = 'list.html';
                     }
                 })
                 .catch(error => {
                     console.error('API isteğinde hata:', error);
-                    alert("Veriler yüklenirken bir hata oluştu.");
+                    alert("Veriler yüklenirken bir hata oluştu: " + error.message);
                     window.location.href = 'list.html';
                 });
         });
@@ -167,30 +172,41 @@
 
         function addKeyword() {
             const selection = window.getSelection();
-            const range = selection.getRangeAt(0);
-            
+            selectedText = selection.toString().trim();
             if (selectedText.length > 0) {
-                const stem = findStem(selectedText);
-                
-                const newSpan = document.createElement('span');
-                newSpan.className = 'keyword-link';
-                newSpan.dataset.keyword = selectedText;
-                newSpan.textContent = selectedText;
-
-                range.deleteContents();
-                range.insertNode(newSpan);
+                const range = selection.getRangeAt(0).getClientRects()[0];
+                keywordPopup.style.display = 'block';
+                keywordPopup.style.top = `${range.bottom + window.scrollY}px`;
+                keywordPopup.style.left = `${range.left + window.scrollX}px`;
+            } else {
                 keywordPopup.style.display = 'none';
+            }
+            
+            const newSpan = document.createElement('span');
+            newSpan.className = 'keyword-link';
+            newSpan.dataset.keyword = selectedText;
+            newSpan.textContent = selectedText;
 
-                if (!keywords.includes(stem)) {
-                    keywords.push(stem);
-                    localStorage.setItem('keywords', JSON.stringify(keywords));
-                }
+            const range = window.getSelection().getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(newSpan);
+            keywordPopup.style.display = 'none';
+
+            const stem = findStem(selectedText);
+            if (!keywords.includes(stem)) {
+                keywords.push(stem);
+                localStorage.setItem('keywords', JSON.stringify(keywords));
             }
         }
         
         function updateQuotation() {
-            fetch('/api/get-materials.js', { method: 'GET' })
-                .then(response => response.json())
+            fetch('/api/get-materials', { method: 'GET' })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text) });
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (Array.isArray(data)) {
                         const materials = data;
@@ -209,12 +225,17 @@
 
                             material['Alıntılar'][quotIndex] = quotationData;
 
-                            fetch('/api/save-material.js', {
+                            fetch('/api/save-material', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify(material),
                             })
-                            .then(response => response.json())
+                            .then(response => {
+                                if (!response.ok) {
+                                    return response.text().then(text => { throw new Error(text) });
+                                }
+                                return response.json();
+                            })
                             .then(updateResult => {
                                 if (updateResult.success) {
                                     alert(`Alıntı başarıyla güncellendi.`);
@@ -222,13 +243,21 @@
                                 } else {
                                     alert('Güncelleme hatası: ' + updateResult.message);
                                 }
+                            })
+                            .catch(error => {
+                                console.error('API isteğinde hata:', error);
+                                alert('Güncelleme isteği sırasında bir hata oluştu: ' + error.message);
                             });
                         } else {
                             alert("Materyal bulunamadı.");
                         }
                     } else {
-                        alert("Veriler yüklenirken bir hata oluştu.");
+                        alert("Veriler yüklenirken bir hata oluştu: " + data.message);
                     }
+                })
+                .catch(error => {
+                    console.error('API isteğinde hata:', error);
+                    alert("Veriler yüklenirken bir hata oluştu: " + error.message);
                 });
         }
 

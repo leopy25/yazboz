@@ -124,10 +124,15 @@
         });
 
         function fetchMaterials() {
-            fetch('/api/get-materials.js', {
+            fetch('/api/get-materials', {
                 method: 'GET',
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text) });
+                }
+                return response.json();
+            })
             .then(data => {
                 if(Array.isArray(data)) {
                     materials = data;
@@ -138,6 +143,7 @@
             })
             .catch(error => {
                 console.error('API isteğinde hata:', error);
+                alert('İstek sırasında bir hata oluştu: ' + error.message);
             });
         }
 
@@ -202,14 +208,19 @@
 
         function deleteMaterial(rCode) {
             if (confirm(`"${rCode}" kodlu materyali ve tüm alıntılarını silmek istediğinizden emin misiniz?`)) {
-                fetch('/api/delete-material.js', {
+                fetch('/api/delete-material', {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({ rCode: rCode }),
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text) });
+                    }
+                    return response.json();
+                })
                 .then(result => {
                     if(result.success) {
                         alert(result.message);
@@ -220,7 +231,7 @@
                 })
                 .catch(error => {
                     console.error('API isteğinde hata:', error);
-                    alert('İstek sırasında bir hata oluştu.');
+                    alert('İstek sırasında bir hata oluştu: ' + error.message);
                 });
             }
         }

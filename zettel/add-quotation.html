@@ -171,10 +171,15 @@
         });
 
         function fetchMaterialsAndRender() {
-            fetch('/api/get-materials.js', {
+            fetch('/api/get-materials', {
                 method: 'GET',
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text) });
+                }
+                return response.json();
+            })
             .then(data => {
                 if(Array.isArray(data)) {
                     materials = data;
@@ -194,12 +199,12 @@
                     }
                 } else {
                     console.error('Veri çekme hatası:', data.message);
-                    alert('Veriler yüklenirken bir hata oluştu.');
+                    alert('Veriler yüklenirken bir hata oluştu: ' + data.message);
                 }
             })
             .catch(error => {
                 console.error('API isteğinde hata:', error);
-                alert('İstek sırasında bir hata oluştu.');
+                alert('İstek sırasında bir hata oluştu: ' + error.message);
             });
         }
         
@@ -262,24 +267,30 @@
         
         function addKeyword() {
             const selection = window.getSelection();
-            const range = selection.getRangeAt(0);
-            
+            selectedText = selection.toString().trim();
             if (selectedText.length > 0) {
-                const stem = findStem(selectedText);
-                
-                const newSpan = document.createElement('span');
-                newSpan.className = 'keyword-link';
-                newSpan.dataset.keyword = selectedText;
-                newSpan.textContent = selectedText;
-
-                range.deleteContents();
-                range.insertNode(newSpan);
+                const range = selection.getRangeAt(0).getBoundingClientRect();
+                keywordPopup.style.display = 'block';
+                keywordPopup.style.top = `${e.pageY + 10}px`;
+                keywordPopup.style.left = `${e.pageX}px`;
+            } else {
                 keywordPopup.style.display = 'none';
+            }
+            
+            const stem = findStem(selectedText);
+                
+            const newSpan = document.createElement('span');
+            newSpan.className = 'keyword-link';
+            newSpan.dataset.keyword = selectedText;
+            newSpan.textContent = selectedText;
 
-                if (!keywords.includes(stem)) {
-                    keywords.push(stem);
-                    localStorage.setItem('keywords', JSON.stringify(keywords));
-                }
+            range.deleteContents();
+            range.insertNode(newSpan);
+            keywordPopup.style.display = 'none';
+
+            if (!keywords.includes(stem)) {
+                keywords.push(stem);
+                localStorage.setItem('keywords', JSON.stringify(keywords));
             }
         }
         
@@ -304,14 +315,19 @@
                     material['Alıntılar'].push(quotationData);
                 }
 
-                fetch('/api/save-material.js', {
+                fetch('/api/save-material', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(material),
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text) });
+                    }
+                    return response.json();
+                })
                 .then(result => {
                     if (result.success) {
                         alert(`Alıntı başarıyla kaydedildi.`);
@@ -326,7 +342,7 @@
                 })
                 .catch(error => {
                     console.error('API isteğinde hata:', error);
-                    alert('İstek sırasında bir hata oluştu.');
+                    alert('İstek sırasında bir hata oluştu: ' + error.message);
                 });
             }
         }
@@ -339,14 +355,19 @@
             if (confirm("Bu alıntıyı silmek istediğinizden emin misiniz?")) {
                 material['Alıntılar'].splice(index, 1);
 
-                fetch('/api/save-material.js', {
+                fetch('/api/save-material', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(material),
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text) });
+                    }
+                    return response.json();
+                })
                 .then(result => {
                     if (result.success) {
                         alert(`Alıntı başarıyla silindi.`);
@@ -357,7 +378,7 @@
                 })
                 .catch(error => {
                     console.error('API isteğinde hata:', error);
-                    alert('İstek sırasında bir hata oluştu.');
+                    alert('İstek sırasında bir hata oluştu: ' + error.message);
                 });
             }
         }

@@ -261,7 +261,6 @@
             materialData["Eklenme Tarihi"] = new Date().toLocaleString('tr-TR');
             materialData["Alıntılar"] = [];
 
-            // Vercel'deki save-material API'sine POST isteği gönder
             fetch('/api/save-material', {
                 method: 'POST',
                 headers: {
@@ -269,15 +268,18 @@
                 },
                 body: JSON.stringify(materialData),
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text) });
+                }
+                return response.json();
+            })
             .then(result => {
                 if(result.success) {
                     alert(`Materyal "${materialData["R-Kod"]}" adıyla başarıyla kaydedildi.`);
-                    
                     document.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
                     document.getElementById('selectionSection').style.display = 'none';
                     document.getElementById(type + 'Form').style.display = 'none';
-                    
                     window.location.href = 'list.html';
                 } else {
                     alert('Hata: ' + result.message);
@@ -285,7 +287,7 @@
             })
             .catch(error => {
                 console.error('API isteğinde hata:', error);
-                alert('İstek sırasında bir hata oluştu.');
+                alert('İstek sırasında bir hata oluştu: ' + error.message);
             });
         }
     </script>
