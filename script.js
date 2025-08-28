@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const countdownDisplay = document.getElementById('countdown');
     const writingPad = document.getElementById('writing-pad');
     const copyButton = document.getElementById('copy-button');
+    const finishButton = document.getElementById('finish-button');
     const wordCountDisplay = document.getElementById('word-count');
     const darkModeToggle = document.getElementById('dark-mode-toggle');
 
@@ -59,7 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
         writingPad.disabled = false;
         writingPad.focus();
         copyButton.classList.add('hidden');
+        finishButton.classList.add('hidden');
         wordCountDisplay.textContent = 'Kelime: 0';
+        countdownDisplay.textContent = '00:00';
 
         timerId = setInterval(() => {
             timeRemaining--;
@@ -71,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearAllTimers();
                 writingPad.disabled = true;
                 copyButton.classList.remove('hidden');
+                finishButton.classList.remove('hidden');
                 writingPad.classList.remove('rapid-blink');
                 alert('Süre doldu! Yazma mücadelesi sona erdi.');
             }
@@ -81,6 +85,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = writingPad.value.trim();
         const words = text === '' ? 0 : text.split(/\s+/).length;
         wordCountDisplay.textContent = `Kelime: ${words}`;
+    };
+
+    const resetApp = () => {
+        clearAllTimers();
+        countdownDisplay.textContent = '00:00';
+        writingPad.value = '';
+        writingPad.disabled = true;
+        copyButton.classList.add('hidden');
+        finishButton.classList.add('hidden');
+        wordCountDisplay.textContent = 'Kelime: 0';
+        normalRadio.checked = true;
+        INACTIVITY_DELETE_TIME = 10;
     };
 
     timerButtons.forEach(button => {
@@ -121,5 +137,9 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Kopyalama başarısız oldu:', err);
             alert('Kopyalama başarısız oldu. Lütfen manuel olarak kopyalayın.');
         }
+    });
+
+    finishButton.addEventListener('click', () => {
+        resetApp();
     });
 });
