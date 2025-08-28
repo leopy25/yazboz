@@ -115,7 +115,6 @@
         </div>
 
         <div id="add-edit-form-section">
-            <button onclick="goBackToList()" class="button">Geri</button>
             <div id="quotation-list-container"></div>
             <h2>Yeni Alıntı Ekle</h2>
             <div class="form-group">
@@ -155,14 +154,26 @@
         let selectedText = '';
         let keywords = JSON.parse(localStorage.getItem('keywords')) || [];
 
+        // Kelime kökü bulma fonksiyonu (Türkçe ve İngilizce)
         function findStem(word) {
             word = word.toLowerCase();
-            const suffixes = ['leri', 'ler', 'lar', 'in', 'un', 'in', 'un', 'den', 'dan', 'a', 'e', 'si', 'ci', 'ciği', 'cığı', 'mak', 'mek'];
-            for (const suffix of suffixes) {
+
+            // Türkçe ekler
+            const turkishSuffixes = ['leri', 'ler', 'lar', 'in', 'un', 'in', 'un', 'den', 'dan', 'a', 'e', 'si', 'ci', 'ciği', 'cığı', 'mak', 'mek', 'ın', 'ün'];
+            for (const suffix of turkishSuffixes) {
                 if (word.endsWith(suffix)) {
                     return word.slice(0, -suffix.length);
                 }
             }
+
+            // İngilizce ekler
+            const englishSuffixes = ['s', 'es', 'ed', 'ing', 'er', 'ly', 'est', 'tion'];
+            for (const suffix of englishSuffixes) {
+                if (word.endsWith(suffix)) {
+                    return word.slice(0, -suffix.length);
+                }
+            }
+
             return word;
         }
 
@@ -311,8 +322,22 @@
             }
         }
 
-        function goBackToList() {
-            window.location.href = 'list.html';
+        function copyQuotation() {
+            if (currentQuotation) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = currentQuotation.metin;
+                const cleanText = tempDiv.innerText || tempDiv.textContent;
+
+                const textToCopy = `${cleanText} (${rCode}, ${currentQuotation.sayfa})`;
+                
+                navigator.clipboard.writeText(textToCopy)
+                    .then(() => {
+                        alert('Alıntı panoya kopyalandı!');
+                    })
+                    .catch(err => {
+                        console.error('Kopyalama hatası:', err);
+                    });
+            }
         }
 
         function finishViewing() {
