@@ -123,6 +123,18 @@
         
         let currentScale = 1;
 
+        // Kelime kökü bulma fonksiyonu (basit bir örnek)
+        function findStem(word) {
+            word = word.toLowerCase();
+            const suffixes = ['leri', 'ler', 'lar', 'in', 'un', 'in', 'un', 'den', 'dan', 'a', 'e', 'si', 'ci', 'ciği', 'cığı', 'mak', 'mek'];
+            for (const suffix of suffixes) {
+                if (word.endsWith(suffix)) {
+                    return word.slice(0, -suffix.length);
+                }
+            }
+            return word;
+        }
+
         function renderMap() {
             map.innerHTML = '<svg id="connection-lines"></svg>'; // Haritayı temizle ve SVG'yi yeniden ekle
             const newSvg = document.getElementById('connection-lines');
@@ -147,7 +159,7 @@
                 node.innerText = keyword;
                 node.style.top = `${y}px`;
                 node.style.left = `${x}px`;
-                node.dataset.keyword = keyword; // Veri kümesine anahtar kelimeyi ekle
+                node.dataset.keyword = keyword;
                 map.appendChild(node);
 
                 addDragEvents(node, keyword);
@@ -156,7 +168,8 @@
                 materials.forEach((material, matIndex) => {
                     if (material['Alıntılar']) {
                         material['Alıntılar'].forEach((quotation, quotIndex) => {
-                            const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+                            const stem = findStem(keyword);
+                            const regex = new RegExp(`\\b(${stem}\\w*)\\b`, 'i');
                             if (regex.test(quotation.metin)) {
                                 keywordQuotations.push({
                                     rCode: material['R-Kod'],
@@ -221,17 +234,15 @@
                 e.preventDefault();
 
                 const mapRect = map.getBoundingClientRect();
-                const newX = (e.clientX - mapRect.left) / currentScale - (startX - (node.getBoundingClientRect().left - mapRect.left) / currentScale);
-                const newY = (e.clientY - mapRect.top) / currentScale - (startY - (node.getBoundingClientRect().top - mapRect.top) / currentScale);
+                const newX = (e.clientX - mapRect.left) / currentScale;
+                const newY = (e.clientY - mapRect.top) / currentScale;
                 
-                node.style.left = `${(e.clientX - mapRect.left) / currentScale}px`;
-                node.style.top = `${(e.clientY - mapRect.top) / currentScale}px`;
+                node.style.left = `${newX}px`;
+                node.style.top = `${newY}px`;
                 
-                // Konumu localstorage'a kaydet
-                keywordPositions[keyword] = { x: (e.clientX - mapRect.left) / currentScale, y: (e.clientY - mapRect.top) / currentScale };
+                keywordPositions[keyword] = { x: newX, y: newY };
                 localStorage.setItem('keywordPositions', JSON.stringify(keywordPositions));
                 
-                // Bağlantı çizgilerini yeniden çiz
                 renderMap();
             });
 

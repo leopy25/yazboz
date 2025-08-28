@@ -194,7 +194,6 @@
             }
         });
 
-        // Alıntıları HTML formatında linkleyen fonksiyon
         function applyKeywords(text) {
             let tempDiv = document.createElement('div');
             tempDiv.innerHTML = text;
@@ -209,7 +208,6 @@
             return tempDiv.innerHTML;
         }
 
-        // Sadece tek bir alıntıyı gösteren fonksiyon (haritadan gelenler için)
         function renderSingleQuotation(quotation) {
             const container = document.getElementById('quotation-container');
             container.innerHTML = `
@@ -220,7 +218,6 @@
             `;
         }
 
-        // Tüm alıntıları listeleyen fonksiyon (listeden gelenler için)
         function renderAllQuotations() {
             const container = document.getElementById('quotation-list-container');
             container.innerHTML = '<h2>Mevcut Alıntılar</h2>';
@@ -304,7 +301,9 @@
             quotationTextElement.innerHTML = quotationToEdit.metin.replace(/<a href="#" data-keyword="(.*?)">(.*?)<\/a>/g, `<span class="keyword-link" data-keyword="$1">$2</span>`);
             
             saveButton.innerText = "Güncelle";
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Sayfanın doğru konuma kaydırılması için
+            const targetElement = document.getElementById('add-edit-form-section');
+            targetElement.scrollIntoView({ behavior: 'smooth' });
         }
 
         function deleteQuotation(index) {
