@@ -115,6 +115,7 @@
         </div>
 
         <div id="add-edit-form-section">
+            <button onclick="goBackToList()" class="button">Geri</button>
             <div id="quotation-list-container"></div>
             <h2>Yeni Alıntı Ekle</h2>
             <div class="form-group">
@@ -141,8 +142,8 @@
         
         document.getElementById('rCodeDisplay').innerText = rCode;
 
-        const materials = JSON.parse(localStorage.getItem('materials')) || [];
-        const material = materials.find(mat => mat['R-Kod'] === rCode);
+        let materials = [];
+        let material = null;
         
         let editingIndex = null;
         let currentQuotation = null;
@@ -154,43 +155,56 @@
         let selectedText = '';
         let keywords = JSON.parse(localStorage.getItem('keywords')) || [];
 
-        // Kelime kökü bulma fonksiyonu (Türkçe ve İngilizce)
         function findStem(word) {
             word = word.toLowerCase();
-
-            // Türkçe ekler
-            const turkishSuffixes = ['leri', 'ler', 'lar', 'in', 'un', 'in', 'un', 'den', 'dan', 'a', 'e', 'si', 'ci', 'ciği', 'cığı', 'mak', 'mek', 'ın', 'ün'];
-            for (const suffix of turkishSuffixes) {
+            const suffixes = ['leri', 'ler', 'lar', 'in', 'un', 'in', 'un', 'den', 'dan', 'a', 'e', 'si', 'ci', 'ciği', 'cığı', 'mak', 'mek'];
+            for (const suffix of suffixes) {
                 if (word.endsWith(suffix)) {
                     return word.slice(0, -suffix.length);
                 }
             }
-
-            // İngilizce ekler
-            const englishSuffixes = ['s', 'es', 'ed', 'ing', 'er', 'ly', 'est', 'tion'];
-            for (const suffix of englishSuffixes) {
-                if (word.endsWith(suffix)) {
-                    return word.slice(0, -suffix.length);
-                }
-            }
-
             return word;
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            if (quotIndex !== null) {
-                document.getElementById('view-quotation-section').style.display = 'block';
-                if (material && material['Alıntılar'] && material['Alıntılar'][quotIndex]) {
-                    currentQuotation = material['Alıntılar'][quotIndex];
-                    renderSingleQuotation(currentQuotation);
-                } else {
-                    document.getElementById('quotation-container').innerHTML = '<p>Alıntı bulunamadı.</p>';
-                }
-            } else {
-                document.getElementById('add-edit-form-section').style.display = 'block';
-                renderAllQuotations();
-            }
+            fetchMaterialsAndRender();
         });
+
+        function fetchMaterialsAndRender() {
+            fetch('api.php', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(result => {
+                if(result.success) {
+                    materials = result.data.map(item => JSON.parse(item.data));
+                    material = materials.find(mat => mat['R-Kod'] === rCode);
+
+                    if (quotIndex !== null) {
+                        document.getElementById('view-quotation-section').style.display = 'block';
+                        if (material && material['Alıntılar'] && material['Alıntılar'][quotIndex]) {
+                            currentQuotation = material['Alıntılar'][quotIndex];
+                            renderSingleQuotation(currentQuotation);
+                        } else {
+                            document.getElementById('quotation-container').innerHTML = '<p>Alıntı bulunamadı.</p>';
+                        }
+                    } else {
+                        document.getElementById('add-edit-form-section').style.display = 'block';
+                        renderAllQuotations();
+                    }
+                } else {
+                    console.error('Veri çekme hatası:', result.message);
+                    alert('Veriler yüklenirken bir hata oluştu.');
+                }
+            })
+            .catch(error => {
+                console.error('API isteğinde hata:', error);
+                alert('İstek sırasında bir hata oluştu.');
+            });
+        }
         
         quotationTextElement.addEventListener('mouseup', function(e) {
             const selection = window.getSelection();
@@ -286,22 +300,39 @@
 
                 if (editingIndex !== null) {
                     material['Alıntılar'][editingIndex] = quotationData;
-                    alert(`Alıntı başarıyla güncellendi.`);
-                    editingIndex = null;
-                    saveButton.innerText = "Kaydet";
                 } else {
                     if (!material['Alıntılar']) {
                         material['Alıntılar'] = [];
                     }
                     material['Alıntılar'].push(quotationData);
-                    alert(`Yeni alıntı kaydedildi.`);
                 }
-                localStorage.setItem('materials', JSON.stringify(materials));
-            }
 
-            pageNumberInput.value = '';
-            quotationTextElement.innerHTML = '';
-            renderAllQuotations();
+                // Tüm materyali API'ye gönder
+                fetch('api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(material),
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert(`Alıntı başarıyla kaydedildi.`);
+                        pageNumberInput.value = '';
+                        quotationTextElement.innerHTML = '';
+                        editingIndex = null;
+                        saveButton.innerText = "Kaydet";
+                        fetchMaterialsAndRender();
+                    } else {
+                        alert('Hata: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('API isteğinde hata:', error);
+                    alert('İstek sırasında bir hata oluştu.');
+                });
+            }
         }
 
         function editQuotation(rCode, index) {
@@ -311,33 +342,32 @@
         function deleteQuotation(index) {
             if (confirm("Bu alıntıyı silmek istediğinizden emin misiniz?")) {
                 material['Alıntılar'].splice(index, 1);
-                localStorage.setItem('materials', JSON.stringify(materials));
-                renderAllQuotations();
-                if (editingIndex === index) {
-                    pageNumberInput.value = '';
-                    quotationTextElement.innerHTML = '';
-                    editingIndex = null;
-                    saveButton.innerText = "Kaydet";
-                }
+
+                fetch('api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(material),
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert(`Alıntı başarıyla silindi.`);
+                        fetchMaterialsAndRender();
+                    } else {
+                        alert('Hata: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('API isteğinde hata:', error);
+                    alert('İstek sırasında bir hata oluştu.');
+                });
             }
         }
 
-        function copyQuotation() {
-            if (currentQuotation) {
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = currentQuotation.metin;
-                const cleanText = tempDiv.innerText || tempDiv.textContent;
-
-                const textToCopy = `${cleanText} (${rCode}, ${currentQuotation.sayfa})`;
-                
-                navigator.clipboard.writeText(textToCopy)
-                    .then(() => {
-                        alert('Alıntı panoya kopyalandı!');
-                    })
-                    .catch(err => {
-                        console.error('Kopyalama hatası:', err);
-                    });
-            }
+        function goBackToList() {
+            window.location.href = 'list.html';
         }
 
         function finishViewing() {

@@ -106,9 +106,6 @@
         
         document.getElementById('rCodeDisplay').innerText = rCode;
 
-        const materials = JSON.parse(localStorage.getItem('materials')) || [];
-        const material = materials.find(mat => mat['R-Kod'] === rCode);
-        
         const pageNumberInput = document.getElementById('pageNumber');
         const quotationTextElement = document.getElementById('quotationText');
         const keywordPopup = document.getElementById('keywordPopup');
@@ -128,14 +125,31 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            if (material && material['Alıntılar'] && material['Alıntılar'][quotIndex]) {
-                const quotationToEdit = material['Alıntılar'][quotIndex];
-                pageNumberInput.value = quotationToEdit.sayfa;
-                quotationTextElement.innerHTML = quotationToEdit.metin.replace(/<a href="#" data-keyword="(.*?)">(.*?)<\/a>/g, `<span class="keyword-link" data-keyword="$1">$2</span>`);
-            } else {
-                alert("Düzenlenecek alıntı bulunamadı.");
-                window.location.href = 'list.html';
-            }
+            fetch('api.php', { method: 'GET' })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        const materials = result.data.map(item => JSON.parse(item.data));
+                        const material = materials.find(mat => mat['R-Kod'] === rCode);
+
+                        if (material && material['Alıntılar'] && material['Alıntılar'][quotIndex]) {
+                            const quotationToEdit = material['Alıntılar'][quotIndex];
+                            pageNumberInput.value = quotationToEdit.sayfa;
+                            quotationTextElement.innerHTML = quotationToEdit.metin.replace(/<a href="#" data-keyword="(.*?)">(.*?)<\/a>/g, `<span class="keyword-link" data-keyword="$1">$2</span>`);
+                        } else {
+                            alert("Düzenlenecek alıntı bulunamadı.");
+                            window.location.href = 'list.html';
+                        }
+                    } else {
+                        alert("Veriler yüklenirken bir hata oluştu.");
+                        window.location.href = 'list.html';
+                    }
+                })
+                .catch(error => {
+                    console.error('API isteğinde hata:', error);
+                    alert("Veriler yüklenirken bir hata oluştu.");
+                    window.location.href = 'list.html';
+                });
         });
         
         quotationTextElement.addEventListener('mouseup', function(e) {
@@ -175,22 +189,47 @@
         }
         
         function updateQuotation() {
-            const pageNumber = pageNumberInput.value;
-            let quotationContent = quotationTextElement.innerHTML;
+            fetch('api.php', { method: 'GET' })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        const materials = result.data.map(item => JSON.parse(item.data));
+                        const material = materials.find(mat => mat['R-Kod'] === rCode);
 
-            quotationContent = quotationContent.replace(/<span class="keyword-link" data-keyword="(.*?)".*?>(.*?)<\/span>/g, `<a href="#" data-keyword="$1">$2</a>`);
+                        if (material) {
+                            const pageNumber = pageNumberInput.value;
+                            let quotationContent = quotationTextElement.innerHTML;
 
-            if (material) {
-                const quotationData = {
-                    "sayfa": pageNumber,
-                    "metin": quotationContent
-                };
+                            quotationContent = quotationContent.replace(/<span class="keyword-link" data-keyword="(.*?)".*?>(.*?)<\/span>/g, `<a href="#" data-keyword="$1">$2</a>`);
+                            
+                            const quotationData = {
+                                "sayfa": pageNumber,
+                                "metin": quotationContent
+                            };
 
-                material['Alıntılar'][quotIndex] = quotationData;
-                localStorage.setItem('materials', JSON.stringify(materials));
-                alert(`Alıntı başarıyla güncellendi.`);
-                window.location.href = `add-quotation.html?rCode=${rCode}&mode=edit`;
-            }
+                            material['Alıntılar'][quotIndex] = quotationData;
+
+                            fetch('api.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(material),
+                            })
+                            .then(response => response.json())
+                            .then(updateResult => {
+                                if (updateResult.success) {
+                                    alert(`Alıntı başarıyla güncellendi.`);
+                                    window.location.href = `add-quotation.html?rCode=${rCode}&mode=edit`;
+                                } else {
+                                    alert('Güncelleme hatası: ' + updateResult.message);
+                                }
+                            });
+                        } else {
+                            alert("Materyal bulunamadı.");
+                        }
+                    } else {
+                        alert("Veriler yüklenirken bir hata oluştu.");
+                    }
+                });
         }
 
         function finishEditing() {

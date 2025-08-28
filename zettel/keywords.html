@@ -110,13 +110,12 @@
         </div>
     </div>
     <script>
-        const materials = JSON.parse(localStorage.getItem('materials')) || [];
-        let keywords = JSON.parse(localStorage.getItem('keywords')) || [];
+        let materials = [];
+        let keywords = [];
         const keywordPositions = JSON.parse(localStorage.getItem('keywordPositions')) || {};
 
         const mapWrapper = document.getElementById('keyword-map-wrapper');
         const map = document.getElementById('keyword-map');
-        const svg = document.getElementById('connection-lines');
         
         const mapWidth = mapWrapper.offsetWidth;
         const mapHeight = mapWrapper.offsetHeight;
@@ -133,6 +132,44 @@
                 }
             }
             return word;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchMaterialsAndRenderMap();
+        });
+
+        function fetchMaterialsAndRenderMap() {
+            fetch('api.php', { method: 'GET' })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        materials = result.data.map(item => JSON.parse(item.data));
+                        // Veritabanındaki tüm alıntılardan anahtar kelimeleri topla
+                        let allKeywords = [];
+                        materials.forEach(material => {
+                            if (material['Alıntılar']) {
+                                material['Alıntılar'].forEach(quotation => {
+                                    const quotationText = quotation.metin.replace(/<[^>]*>/g, '');
+                                    const words = quotationText.split(/\s+/);
+                                    words.forEach(word => {
+                                        const stem = findStem(word);
+                                        if (stem.length > 2 && !allKeywords.includes(stem)) {
+                                            allKeywords.push(stem);
+                                        }
+                                    });
+                                });
+                            }
+                        });
+                        keywords = allKeywords;
+                        localStorage.setItem('keywords', JSON.stringify(keywords)); // Keywords'ü güncel tut
+                        renderMap();
+                    } else {
+                        console.error('Veri çekme hatası:', result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('API isteğinde hata:', error);
+                });
         }
 
         function renderMap() {
@@ -168,9 +205,8 @@
                 materials.forEach((material, matIndex) => {
                     if (material['Alıntılar']) {
                         material['Alıntılar'].forEach((quotation, quotIndex) => {
-                            const stem = findStem(keyword);
-                            const regex = new RegExp(`\\b(${stem}\\w*)\\b`, 'i');
-                            if (regex.test(quotation.metin)) {
+                            const stem = findStem(quotation.metin.replace(/<[^>]*>/g, ''));
+                            if (stem === findStem(keyword)) {
                                 keywordQuotations.push({
                                     rCode: material['R-Kod'],
                                     page: quotation.sayfa,
@@ -255,8 +291,6 @@
                 map.style.cursor = 'grab';
             });
         }
-
-        renderMap();
 
         mapWrapper.addEventListener('wheel', (e) => {
             e.preventDefault();
