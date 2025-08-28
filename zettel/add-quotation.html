@@ -171,16 +171,13 @@
         });
 
         function fetchMaterialsAndRender() {
-            fetch('api.php', {
+            fetch('/api/get-materials.js', {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
             })
             .then(response => response.json())
-            .then(result => {
-                if(result.success) {
-                    materials = result.data.map(item => JSON.parse(item.data));
+            .then(data => {
+                if(Array.isArray(data)) {
+                    materials = data;
                     material = materials.find(mat => mat['R-Kod'] === rCode);
 
                     if (quotIndex !== null) {
@@ -196,7 +193,7 @@
                         renderAllQuotations();
                     }
                 } else {
-                    console.error('Veri çekme hatası:', result.message);
+                    console.error('Veri çekme hatası:', data.message);
                     alert('Veriler yüklenirken bir hata oluştu.');
                 }
             })
@@ -307,8 +304,7 @@
                     material['Alıntılar'].push(quotationData);
                 }
 
-                // Tüm materyali API'ye gönder
-                fetch('api.php', {
+                fetch('/api/save-material.js', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -343,7 +339,7 @@
             if (confirm("Bu alıntıyı silmek istediğinizden emin misiniz?")) {
                 material['Alıntılar'].splice(index, 1);
 
-                fetch('api.php', {
+                fetch('/api/save-material.js', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

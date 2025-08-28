@@ -98,8 +98,7 @@
     <div class="container">
         <h1>Kaydedilmiş Materyaller</h1>
         <a href="index.html" class="button">Yeni Materyal Ekle</a>
-        <a href="index.html" class="button" style="float: right;">Geri</a>
-
+        
         <table>
             <thead>
                 <tr>
@@ -117,12 +116,30 @@
     </div>
 
     <script>
-        const materials = JSON.parse(localStorage.getItem('materials')) || [];
+        let materials = [];
         let sortDirection = {};
 
         document.addEventListener('DOMContentLoaded', () => {
-            renderTable(materials);
+            fetchMaterials();
         });
+
+        function fetchMaterials() {
+            fetch('/api/get-materials.js', {
+                method: 'GET',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(Array.isArray(data)) {
+                    materials = data;
+                    renderTable(materials);
+                } else {
+                    console.error('Veri çekme hatası:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('API isteğinde hata:', error);
+            });
+        }
 
         function renderTable(data) {
             const tableBody = document.getElementById('materialTableBody');
@@ -185,9 +202,26 @@
 
         function deleteMaterial(rCode) {
             if (confirm(`"${rCode}" kodlu materyali ve tüm alıntılarını silmek istediğinizden emin misiniz?`)) {
-                const updatedMaterials = materials.filter(mat => mat['R-Kod'] !== rCode);
-                localStorage.setItem('materials', JSON.stringify(updatedMaterials));
-                renderTable(updatedMaterials);
+                fetch('/api/delete-material.js', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ rCode: rCode }),
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if(result.success) {
+                        alert(result.message);
+                        fetchMaterials();
+                    } else {
+                        alert('Hata: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('API isteğinde hata:', error);
+                    alert('İstek sırasında bir hata oluştu.');
+                });
             }
         }
     </script>

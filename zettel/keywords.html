@@ -122,7 +122,6 @@
         
         let currentScale = 1;
 
-        // Kelime kökü bulma fonksiyonu (basit bir örnek)
         function findStem(word) {
             word = word.toLowerCase();
             const suffixes = ['leri', 'ler', 'lar', 'in', 'un', 'in', 'un', 'den', 'dan', 'a', 'e', 'si', 'ci', 'ciği', 'cığı', 'mak', 'mek'];
@@ -139,12 +138,11 @@
         });
 
         function fetchMaterialsAndRenderMap() {
-            fetch('api.php', { method: 'GET' })
+            fetch('/api/get-materials.js', { method: 'GET' })
                 .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        materials = result.data.map(item => JSON.parse(item.data));
-                        // Veritabanındaki tüm alıntılardan anahtar kelimeleri topla
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        materials = data;
                         let allKeywords = [];
                         materials.forEach(material => {
                             if (material['Alıntılar']) {
@@ -161,10 +159,10 @@
                             }
                         });
                         keywords = allKeywords;
-                        localStorage.setItem('keywords', JSON.stringify(keywords)); // Keywords'ü güncel tut
+                        localStorage.setItem('keywords', JSON.stringify(keywords));
                         renderMap();
                     } else {
-                        console.error('Veri çekme hatası:', result.message);
+                        console.error('Veri çekme hatası:', data.message);
                     }
                 })
                 .catch(error => {
@@ -173,7 +171,7 @@
         }
 
         function renderMap() {
-            map.innerHTML = '<svg id="connection-lines"></svg>'; // Haritayı temizle ve SVG'yi yeniden ekle
+            map.innerHTML = '<svg id="connection-lines"></svg>';
             const newSvg = document.getElementById('connection-lines');
             
             const totalKeywords = keywords.length;

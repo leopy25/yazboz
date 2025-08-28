@@ -261,8 +261,8 @@
             materialData["Eklenme Tarihi"] = new Date().toLocaleString('tr-TR');
             materialData["Alıntılar"] = [];
 
-            // API'ye POST isteği gönder
-            fetch('api.php', {
+            // Vercel'deki save-material API'sine POST isteği gönder
+            fetch('/api/save-material.js', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -274,12 +274,10 @@
                 if(result.success) {
                     alert(`Materyal "${materialData["R-Kod"]}" adıyla başarıyla kaydedildi.`);
                     
-                    // Formu sıfırla
                     document.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
                     document.getElementById('selectionSection').style.display = 'none';
                     document.getElementById(type + 'Form').style.display = 'none';
                     
-                    // İşlem bitince listeye yönlendir
                     window.location.href = 'list.html';
                 } else {
                     alert('Hata: ' + result.message);

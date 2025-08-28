@@ -125,11 +125,11 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            fetch('api.php', { method: 'GET' })
+            fetch('/api/get-materials.js', { method: 'GET' })
                 .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        const materials = result.data.map(item => JSON.parse(item.data));
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        const materials = data;
                         const material = materials.find(mat => mat['R-Kod'] === rCode);
 
                         if (material && material['Alıntılar'] && material['Alıntılar'][quotIndex]) {
@@ -189,11 +189,11 @@
         }
         
         function updateQuotation() {
-            fetch('api.php', { method: 'GET' })
+            fetch('/api/get-materials.js', { method: 'GET' })
                 .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        const materials = result.data.map(item => JSON.parse(item.data));
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        const materials = data;
                         const material = materials.find(mat => mat['R-Kod'] === rCode);
 
                         if (material) {
@@ -209,7 +209,7 @@
 
                             material['Alıntılar'][quotIndex] = quotationData;
 
-                            fetch('api.php', {
+                            fetch('/api/save-material.js', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify(material),
