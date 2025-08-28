@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yazma Mücadelesi</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>YAZ-BOZ</h1>
+        <div class="timer-options">
+            <button data-time="2">2 Dakika</button>
+            <button data-time="5">5 Dakika</button>
+            <button data-time="10">10 Dakika</button>
+            <button data-time="30">30 Dakika</button>
+        </div>
+        
+        <div class="inactivity-options">
+            <div class="option">
+                <input type="radio" id="normal" name="mode" value="normal" checked>
+                <label for="normal">Normal</label>
+                <span class="tooltip">10 saniye içinde yazmazsan silinecek.</span>
+            </div>
+            <div class="option">
+                <input type="radio" id="daredevil" name="mode" value="daredevil">
+                <label for="daredevil">Gözükara</label>
+                <span class="tooltip">5 saniye içinde yazmazsan silinecek.</span>
+            </div>
+        </div>
+
+        <div class="challenge-area">
+            <div class="timer">Süre: <span id="countdown">00:00</span></div>
+            <div class="stats">
+                <span id="word-count">Kelime: 0</span>
+                <button id="dark-mode-toggle">Karanlık Mod</button>
+            </div>
+            <textarea id="writing-pad" placeholder="Yazmaya başlamak için bir zaman ve mod seçin..." disabled></textarea>
+            <button id="copy-button" class="hidden">Yazıyı Kopyala</button>
+            <button id="finish-button" class="hidden">Bitti</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;700&display=swap');
-
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
@@ -8,155 +6,40 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
+    text-align: center;
 }
 
-.container {
+.homepage-container {
     background-color: #fff;
-    padding: 20px 40px;
+    padding: 50px 80px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    width: 90%;
-    max-width: 800px;
 }
 
 h1 {
     color: #333;
+    margin-bottom: 20px;
+    font-size: 2.5em;
 }
 
-.timer-options button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    margin: 5px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
-}
-
-.timer-options button:hover {
-    background-color: #0056b3;
-}
-
-.challenge-area {
-    margin-top: 20px;
-}
-
-.timer {
-    font-size: 24px;
-    font-weight: bold;
-    color: #555;
-    margin-bottom: 15px;
-}
-
-.stats {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    color: #555;
-}
-
-#dark-mode-toggle {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s;
-}
-
-#dark-mode-toggle:hover {
-    background-color: #45a049;
-}
-
-#writing-pad {
-    width: 100%;
-    height: 450px;
-    padding: 10px;
-    font-size: 18px;
-    line-height: 1.5;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    resize: none;
-    box-sizing: border-box;
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-    font-family: 'EB Garamond', serif;
-}
-
-#writing-pad:focus {
-    outline: none;
-    border-color: #007bff;
-}
-
-#writing-pad.dark-mode {
-    background-color: #1a1a1a;
-    color: #f4f4f4;
-    border-color: #444;
-}
-
-#copy-button, #finish-button {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    margin-top: 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
-}
-
-#copy-button:hover, #finish-button:hover {
-    background-color: #218838;
-}
-
-.hidden {
-    display: none;
-}
-
-@keyframes rapid-caret-blink {
-    50% {
-        border-right-color: transparent;
-    }
-}
-
-#writing-pad.rapid-blink {
-    animation: rapid-caret-blink 0.3s steps(1) infinite;
-}
-
-.inactivity-options {
-    margin: 15px 0;
+.button-group {
     display: flex;
     justify-content: center;
     gap: 20px;
-    font-size: 16px;
 }
 
-.option {
-    position: relative;
-    cursor: pointer;
-}
-
-.tooltip {
-    visibility: hidden;
-    position: absolute;
-    top: -40px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.8);
+.app-button {
+    display: inline-block;
+    background-color: #007bff;
     color: white;
-    padding: 5px 10px;
+    text-decoration: none;
+    padding: 15px 30px;
     border-radius: 5px;
-    font-size: 14px;
-    white-space: nowrap;
-    z-index: 10;
+    font-size: 1.5em;
+    font-weight: bold;
+    transition: background-color 0.3s;
 }
 
-.option:hover .tooltip {
-    visibility: visible;
+.app-button:hover {
+    background-color: #0056b3;
 }

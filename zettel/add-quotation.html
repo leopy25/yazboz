@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alıntı Görüntüle</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .quotation-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background-color: #fafafa;
+        }
+
+        .quotation-card p {
+            margin: 0;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Alıntı Görüntüle</h1>
+        <p>Materyal R-Kodu: <strong id="rCodeDisplay"></strong></p>
+
+        <div id="quotation-container">
+            </div>
+
+        <button onclick="copyQuotation()">Alıntıyı Kopyala</button>
+        <button onclick="finishViewing()">Bitti</button>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const rCode = urlParams.get('rCode');
+        const quotIndex = urlParams.get('quotIndex');
+        
+        document.getElementById('rCodeDisplay').innerText = rCode;
+
+        let currentQuotation = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const materials = JSON.parse(localStorage.getItem('materials')) || [];
+            const material = materials.find(mat => mat['R-Kod'] === rCode);
+
+            if (material && material['Alıntılar'] && material['Alıntılar'][quotIndex]) {
+                currentQuotation = material['Alıntılar'][quotIndex];
+                renderQuotation(material, currentQuotation);
+            } else {
+                document.getElementById('quotation-container').innerHTML = '<p>Alıntı bulunamadı.</p>';
+            }
+        });
+        
+        function renderQuotation(material, quotation) {
+            const container = document.getElementById('quotation-container');
+            container.innerHTML = `
+                <div class="quotation-card">
+                    <p><strong>Sayfa:</strong> [${quotation.sayfa}]</p>
+                    <p>${quotation.metin}</p>
+                </div>
+            `;
+        }
+
+        function copyQuotation() {
+            if (currentQuotation) {
+                // Alıntı metninden HTML etiketlerini temizle
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = currentQuotation.metin;
+                const cleanText = tempDiv.innerText || tempDiv.textContent;
+
+                const textToCopy = `${cleanText} (${rCode}, ${currentQuotation.sayfa})`;
+                
+                navigator.clipboard.writeText(textToCopy)
+                    .then(() => {
+                        alert('Alıntı panoya kopyalandı!');
+                    })
+                    .catch(err => {
+                        console.error('Kopyalama hatası:', err);
+                    });
+            }
+        }
+
+        function finishViewing() {
+            // Butona tıklandığında Anahtar Kelimeler sayfasına yönlendirir
+            window.location.href = 'keywords.html';
+        }
+    </script>
+</body>
+</html>

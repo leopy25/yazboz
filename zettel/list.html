@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaydedilen Materyaller</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        
+        td a {
+            color: #007bff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        td a:hover {
+            text-decoration: underline;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .actions {
+            margin-top: 20px;
+        }
+
+        button, a.button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        
+        button.delete {
+            background-color: #dc3545;
+        }
+
+        .material-details {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fafafa;
+        }
+
+        .quotation-list {
+            margin-top: 15px;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Kaydedilmiş Materyaller</h1>
+        <a href="index.html" class="button">Yeni Materyal Ekle</a>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">R-Kod</th>
+                    <th onclick="sortTable(1)">Yazar Adı-Soyadı</th>
+                    <th onclick="sortTable(2)">Eser Adı</th>
+                    <th onclick="sortTable(3)">Materyal Türü</th>
+                    <th onclick="sortTable(4)">Eklenme Tarihi</th>
+                    <th colspan="2">Eylemler</th>
+                </tr>
+            </thead>
+            <tbody id="materialTableBody">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const materials = JSON.parse(localStorage.getItem('materials')) || [];
+        let sortDirection = {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTable(materials);
+        });
+
+        function renderTable(data) {
+            const tableBody = document.getElementById('materialTableBody');
+            tableBody.innerHTML = '';
+            data.forEach((material, index) => {
+                const row = document.createElement('tr');
+                const eserAdi = material['Makale Adı'] || material['Kitap Adı'] || material['Bölüm Başlığı'] || '';
+                row.innerHTML = `
+                    <td><a href="add-quotation.html?rCode=${material['R-Kod']}" title="Alıntıları görüntüle/düzenle">${material['R-Kod']}</a></td>
+                    <td>${material['Yazar Adı-Soyadı'] || material['Sorumlu Yazarın Adı'] || ''}</td>
+                    <td>${eserAdi}</td>
+                    <td>${material['Materyal Türü']}</td>
+                    <td>${material['Eklenme Tarihi']}</td>
+                    <td><button onclick="addQuotation('${material['R-Kod']}')">Alıntı Ekle</button></td>
+                    <td><button class="delete" onclick="deleteMaterial('${material['R-Kod']}')">Sil</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function sortTable(columnIndex) {
+            const header = document.getElementsByTagName('th')[columnIndex];
+            const key = header.innerText.replace('Adı-Soyadı', 'Adı-Soyadı').trim();
+            
+            let sortKey = '';
+            switch(key) {
+                case 'R-Kod':
+                    sortKey = 'R-Kod';
+                    break;
+                case 'Yazar Adı-Soyadı':
+                    sortKey = 'Yazar Adı-Soyadı';
+                    break;
+                case 'Eser Adı':
+                    sortKey = 'Makale Adı';
+                    break;
+                case 'Materyal Türü':
+                    sortKey = 'Materyal Türü';
+                    break;
+                case 'Eklenme Tarihi':
+                    sortKey = 'Eklenme Tarihi';
+                    break;
+            }
+
+            const direction = sortDirection[key] === 'asc' ? 'desc' : 'asc';
+            sortDirection[key] = direction;
+
+            const sortedMaterials = materials.slice().sort((a, b) => {
+                const valA = a[sortKey] || '';
+                const valB = b[sortKey] || '';
+                
+                if (direction === 'asc') {
+                    return valA.localeCompare(valB, 'tr', { numeric: true });
+                } else {
+                    return valB.localeCompare(valA, 'tr', { numeric: true });
+                }
+            });
+
+            renderTable(sortedMaterials);
+        }
+
+        function addQuotation(rCode) {
+            window.location.href = `add-quotation.html?rCode=${rCode}`;
+        }
+
+        function deleteMaterial(rCode) {
+            if (confirm(`"${rCode}" kodlu materyali ve tüm alıntılarını silmek istediğinizden emin misiniz?`)) {
+                const updatedMaterials = materials.filter(mat => mat['R-Kod'] !== rCode);
+                localStorage.setItem('materials', JSON.stringify(updatedMaterials));
+                renderTable(updatedMaterials);
+            }
+        }
+    </script>
+</body>
+</html>
