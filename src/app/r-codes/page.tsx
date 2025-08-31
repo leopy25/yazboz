@@ -391,8 +391,8 @@ export default function Dashboard() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [sourceType, setSourceType] = useState('Kitap');
   const [newNote, setNewNote] = useState({
-    rKod: '', cKod: '', fKod: '', metin: '', anahtarKelimeler: '',
-    kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', sayfa: '' },
+    rKod: '', cKod: '', fKod: '', metin: '', sayfa: '', anahtarKelimeler: '',
+    kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '' },
     kitapBölümü: { eserAdı: '', editör: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', bölümAdı: '', bölümYazarı: '', sayfaAralığı: '' },
     makale: { makaleAdı: '', yazar: '', yayınlandığıDergi: '', yayınYılı: '', sayfaAralığı: '', doi: '' }
   });
@@ -428,8 +428,7 @@ export default function Dashboard() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    // Yalnızca seçili kaynak tipinin verilerini toplamak için yeni bir nesne oluştur
+
     let specificSourceData = {};
     if (sourceType === 'Kitap') {
         specificSourceData = newNote.kitap;
