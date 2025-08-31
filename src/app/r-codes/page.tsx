@@ -374,6 +374,7 @@ const C_CODE_DISCIPLINES = [
     { code: 'C5000000', discipline: 'Applied science' }
 ];
 
+// Note tipi, zorunlu alanları ve isteğe bağlı olanları belirtir
 type Note = {
   id: string;
   type: string;
@@ -387,15 +388,16 @@ type Note = {
   anahtarKelimeler: string[];
 };
 
-export default function Dashboard() {
+export default function RCodePage() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [sourceType, setSourceType] = useState('Kitap');
   const [newNote, setNewNote] = useState({
-    rKod: '', cKod: '', fKod: '', metin: '', sayfa: '', anahtarKelimeler: '',
+    rKod: '', cKod: '', fKod: '', metin: '', anahtarKelimeler: '',
     kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '' },
     kitapBölümü: { eserAdı: '', editör: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', bölümAdı: '', bölümYazarı: '', sayfaAralığı: '' },
     makale: { makaleAdı: '', yazar: '', yayınlandığıDergi: '', yayınYılı: '', sayfaAralığı: '', doi: '' }
   });
+  const [sortBy, setSortBy] = useState('rKod'); // Sıralama için state
 
   useEffect(() => {
     fetchNotes();
@@ -475,36 +477,60 @@ export default function Dashboard() {
   const handleFieldChange = (source: string, field: string, value: string) => {
     if (source === 'genel') {
       setNewNote(prev => ({ ...prev, [field]: value }));
-    } else {
+    } else if (source === 'kitap' || source === 'kitapBölümü' || source === 'makale') {
+      const specificSource = source as 'kitap' | 'kitapBölümü' | 'makale';
       setNewNote(prev => ({
         ...prev,
-        [source]: {
-          ...prev[source as keyof typeof prev],
+        [specificSource]: {
+          ...prev[specificSource],
           [field]: value
         }
       }));
     }
   };
 
+  const sortedNotes = [...notes].sort((a, b) => {
+    if (sortBy === 'rKod') {
+      return a.rKod.localeCompare(b.rKod);
+    }
+    if (sortBy === 'yazar') {
+      const yazarA = a.yazar || '';
+      const yazarB = b.yazar || '';
+      return yazarA.localeCompare(yazarB);
+    }
+    if (sortBy === 'yayınYılı') {
+      // Yayın yılı yoksa, boş string olarak kabul et
+      const yilA = (a as any).yayınYılı || (a as any).basımYılı || '';
+      const yilB = (b as any).yayınYılı || (b as any).basımYılı || '';
+      return yilA.localeCompare(yilB);
+    }
+    if (sortBy === 'eserAdı') {
+      const eserA = (a as any).eserAdı || (a as any).makaleAdı || '';
+      const eserB = (b as any).eserAdı || (b as any).makaleAdı || '';
+      return eserA.localeCompare(eserB);
+    }
+    return 0;
+  });
+
   return (
     <div className="container">
-      <h1>Zettelkasten Dashboard</h1>
+      <a href="/">Anasayfa</a>
+      <h1>R-kod Arşivi</h1>
 
-      {/* Kaynak Tipi Seçimi */}
-      <div>
-        <label>Kaynak Tipi:</label>
-        <select value={sourceType} onChange={handleSourceChange}>
-          <option value="Kitap">Kitap</option>
-          <option value="KitapBölümü">Kitap Bölümü</option>
-          <option value="Makale">Bilimsel Makale</option>
-        </select>
-      </div>
-
-      {/* Not Ekleme Formu */}
+      {/* Kaynak Ekleme Formu */}
       <form onSubmit={handleSubmit}>
         
         {/* Ortak Alanlar */}
-        <h2>Genel Bilgiler</h2>
+        <h2>Kaynak Bilgilerini Girin</h2>
+        <div>
+          <label>Kaynak Tipi:</label>
+          <select value={sourceType} onChange={handleSourceChange}>
+            <option value="Kitap">Kitap</option>
+            <option value="KitapBölümü">Kitap Bölümü</option>
+            <option value="Makale">Bilimsel Makale</option>
+          </select>
+        </div>
+
         <input type="text" placeholder="R-kod (Boş bırakırsanız otomatik atanır)" value={newNote.rKod} onChange={e => handleFieldChange('genel', 'rKod', e.target.value)} />
         
         <div>
@@ -518,16 +544,12 @@ export default function Dashboard() {
             ))}
           </select>
         </div>
-
         <input type="text" placeholder="F-kod" value={newNote.fKod} onChange={e => handleFieldChange('genel', 'fKod', e.target.value)} />
-        <textarea placeholder="Alıntı Metni" value={newNote.metin} onChange={e => handleFieldChange('genel', 'metin', e.target.value)} />
-        <input type="text" placeholder="Sayfa Aralığı" value={newNote.sayfa} onChange={e => handleFieldChange('genel', 'sayfa', e.target.value)} />
-        <input type="text" placeholder="Anahtar Kelimeler (virgülle ayırın)" value={newNote.anahtarKelimeler} onChange={e => handleFieldChange('genel', 'anahtarKelimeler', e.target.value)} />
-        
+
         {/* Kaynak Tipine Göre Alanlar */}
         {sourceType === 'Kitap' && (
           <div>
-            <h2>Kitap Bilgileri</h2>
+            <h3>Kitap Bilgileri</h3>
             <input type="text" placeholder="Eser Adı" value={newNote.kitap.eserAdı} onChange={e => handleFieldChange('kitap', 'eserAdı', e.target.value)} />
             <input type="text" placeholder="Yazar Ad-Soyad" value={newNote.kitap.yazar} onChange={e => handleFieldChange('kitap', 'yazar', e.target.value)} />
             <input type="text" placeholder="Basım Yılı" value={newNote.kitap.basımYılı} onChange={e => handleFieldChange('kitap', 'basımYılı', e.target.value)} />
@@ -539,7 +561,7 @@ export default function Dashboard() {
 
         {sourceType === 'KitapBölümü' && (
           <div>
-            <h2>Kitap Bölümü Bilgileri</h2>
+            <h3>Kitap Bölümü Bilgileri</h3>
             <input type="text" placeholder="Eser Adı" value={newNote.kitapBölümü.eserAdı} onChange={e => handleFieldChange('kitapBölümü', 'eserAdı', e.target.value)} />
             <input type="text" placeholder="Editör(ler) Ad Soyad" value={newNote.kitapBölümü.editör} onChange={e => handleFieldChange('kitapBölümü', 'editör', e.target.value)} />
             <input type="text" placeholder="Basım Yılı" value={newNote.kitapBölümü.basımYılı} onChange={e => handleFieldChange('kitapBölümü', 'basımYılı', e.target.value)} />
@@ -554,7 +576,7 @@ export default function Dashboard() {
 
         {sourceType === 'Makale' && (
           <div>
-            <h2>Bilimsel Makale Bilgileri</h2>
+            <h3>Bilimsel Makale Bilgileri</h3>
             <input type="text" placeholder="Makale Adı" value={newNote.makale.makaleAdı} onChange={e => handleFieldChange('makale', 'makaleAdı', e.target.value)} />
             <input type="text" placeholder="Yazar Ad-Soyad" value={newNote.makale.yazar} onChange={e => handleFieldChange('makale', 'yazar', e.target.value)} />
             <input type="text" placeholder="Yayınlandığı Dergi" value={newNote.makale.yayınlandığıDergi} onChange={e => handleFieldChange('makale', 'yayınlandığıDergi', e.target.value)} />
@@ -564,27 +586,48 @@ export default function Dashboard() {
           </div>
         )}
 
-        <button type="submit">Notu Kaydet</button>
+        <button type="submit">Kaynağı Kaydet</button>
       </form>
 
       <hr />
 
-      {/* Kayıtlı Notları Gösteren Bölüm */}
+      {/* R-kod Listeleme ve Sıralama */}
       <div>
-        <h2>Kayıtlı Notlar</h2>
-        <ul>
-          {notes.map((note) => (
-            <li key={note.id}>
-              <button className="delete-button" onClick={() => handleDelete(note.id)}>Sil</button>
-              <strong>Kaynak Tipi:</strong> {note.type} <br />
-              <strong>R-Kod:</strong> {note.rKod} <br />
-              <strong>C-Kod:</strong> {note.cKod} <br />
-              <strong>F-Kod:</strong> {note.fKod} <br />
-              <strong>Alıntı:</strong> {note.metin} <br />
-              <strong>Anahtar Kelimeler:</strong> {note.anahtarKelimeler.join(', ')}
-            </li>
-          ))}
-        </ul>
+        <h2>Kayıtlı R-kodlar</h2>
+        <div>
+          <label>Sırala:</label>
+          <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
+            <option value="rKod">R-koda Göre</option>
+            <option value="yazar">Yazar Adına Göre</option>
+            <option value="yayınYılı">Yayın Yılına Göre</option>
+            <option value="eserAdı">Eser Adına Göre</option>
+          </select>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>R-Kod</th>
+              <th>Yazar Adı</th>
+              <th>Yayın Yılı</th>
+              <th>Eser Adı</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedNotes.map((note) => (
+              <tr key={note.id}>
+                <td>{note.rKod}</td>
+                <td>{note.yazar || note.bölümYazarı}</td>
+                <td>{note.yayınYılı || note.basımYılı}</td>
+                <td>{note.eserAdı || note.makaleAdı || note.bölümAdı}</td>
+                <td>
+                  <button onClick={() => handleDelete(note.id)}>Sil</button>
+                  <button>Aç</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
