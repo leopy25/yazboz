@@ -3,8 +3,21 @@
 import { useState, useEffect } from 'react';
 import React from 'react';
 
+type Note = {
+  id: string;
+  type: string;
+  rKod: string;
+  cKod: string;
+  fKod: string;
+  kaynakAdı: string;
+  yazar: string;
+  metin: string;
+  sayfa: string;
+  anahtarKelimeler: string[];
+};
+
 export default function Dashboard() {
-  const [notes, setNotes] = useState([]);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [newNote, setNewNote] = useState({ type: '', metin: '', rKod: '', cKod: '', fKod: '', kaynakAdı: '', yazar: '', sayfa: '', anahtarKelimeler: '' });
 
   // Notları Redis'ten çek
@@ -61,7 +74,7 @@ export default function Dashboard() {
       <div>
         <h2>Kayıtlı Notlar</h2>
         <ul>
-          {notes.map(note => (
+          {notes.map((note) => (
             <li key={note.id}>
               <strong>{note.kaynakAdı}</strong> ({note.type}) - Kod: {note.rKod}
               <p>{note.metin}</p>
