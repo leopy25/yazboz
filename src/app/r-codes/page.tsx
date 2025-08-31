@@ -391,8 +391,8 @@ export default function Dashboard() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [sourceType, setSourceType] = useState('Kitap');
   const [newNote, setNewNote] = useState({
-    rKod: '', cKod: '', fKod: '', metin: '', sayfa: '', anahtarKelimeler: '',
-    kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '' },
+    rKod: '', cKod: '', fKod: '', metin: '', anahtarKelimeler: '',
+    kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', sayfa: '' },
     kitapBölümü: { eserAdı: '', editör: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', bölümAdı: '', bölümYazarı: '', sayfaAralığı: '' },
     makale: { makaleAdı: '', yazar: '', yayınlandığıDergi: '', yayınYılı: '', sayfaAralığı: '', doi: '' }
   });
@@ -428,14 +428,15 @@ export default function Dashboard() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    let extraData = {};
+    
+    // Yalnızca seçili kaynak tipinin verilerini toplamak için yeni bir nesne oluştur
+    let specificSourceData = {};
     if (sourceType === 'Kitap') {
-        extraData = newNote.kitap;
+        specificSourceData = newNote.kitap;
     } else if (sourceType === 'KitapBölümü') {
-        extraData = newNote.kitapBölümü;
+        specificSourceData = newNote.kitapBölümü;
     } else if (sourceType === 'Makale') {
-        extraData = newNote.makale;
+        specificSourceData = newNote.makale;
     }
 
     const noteData = {
@@ -445,7 +446,7 @@ export default function Dashboard() {
         fKod: newNote.fKod,
         metin: newNote.metin,
         anahtarKelimeler: newNote.anahtarKelimeler.split(',').map(kw => kw.trim()),
-        ...extraData
+        ...specificSourceData
     };
 
     const res = await fetch('/api/notes', {
