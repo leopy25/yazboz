@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import React from 'react';
 
 export default function Dashboard() {
   const [notes, setNotes] = useState([]);
@@ -22,7 +23,7 @@ export default function Dashboard() {
   };
 
   // Yeni notu kaydetme
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const res = await fetch('/api/notes', {
       method: 'POST',
@@ -33,7 +34,7 @@ export default function Dashboard() {
       }),
     });
     if (res.ok) {
-      alert('Not kaydedildi!');
+      alert('Not başarıyla kaydedildi!');
       setNewNote({ type: '', metin: '', rKod: '', cKod: '', fKod: '', kaynakAdı: '', yazar: '', sayfa: '', anahtarKelimeler: '' });
       fetchNotes(); // Yeni notu ekledikten sonra listeyi güncelle
     } else {
