@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import React from 'react';
+import Link from 'next/link';
 
 // C-kodları ve disiplinleri içeren liste
 const C_CODE_DISCIPLINES = [
@@ -374,7 +375,6 @@ const C_CODE_DISCIPLINES = [
     { code: 'C5000000', discipline: 'Applied science' }
 ];
 
-// Note tipi, zorunlu alanları ve isteğe bağlı olanları belirtir
 type Note = {
   id: string;
   type: string;
@@ -397,7 +397,7 @@ export default function RCodePage() {
     kitapBölümü: { eserAdı: '', editör: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', bölümAdı: '', bölümYazarı: '', sayfaAralığı: '' },
     makale: { makaleAdı: '', yazar: '', yayınlandığıDergi: '', yayınYılı: '', sayfaAralığı: '', doi: '' }
   });
-  const [sortBy, setSortBy] = useState('rKod'); // Sıralama için state
+  const [sortBy, setSortBy] = useState('rKod');
 
   useEffect(() => {
     fetchNotes();
@@ -459,7 +459,7 @@ export default function RCodePage() {
     if (res.ok) {
       alert('Not başarıyla kaydedildi!');
       setNewNote({
-        rKod: '', cKod: '', fKod: '', metin: '', sayfa: '', anahtarKelimeler: '',
+        rKod: '', cKod: '', fKod: '', metin: '', anahtarKelimeler: '',
         kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '' },
         kitapBölümü: { eserAdı: '', editör: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', bölümAdı: '', bölümYazarı: '', sayfaAralığı: '' },
         makale: { makaleAdı: '', yazar: '', yayınlandığıDergi: '', yayınYılı: '', sayfaAralığı: '', doi: '' }
@@ -477,7 +477,7 @@ export default function RCodePage() {
   const handleFieldChange = (source: string, field: string, value: string) => {
     if (source === 'genel') {
       setNewNote(prev => ({ ...prev, [field]: value }));
-    } else if (source === 'kitap' || source === 'kitapBölümü' || source === 'makale') {
+    } else {
       const specificSource = source as 'kitap' | 'kitapBölümü' | 'makale';
       setNewNote(prev => ({
         ...prev,
@@ -493,28 +493,27 @@ export default function RCodePage() {
     if (sortBy === 'rKod') {
       return a.rKod.localeCompare(b.rKod);
     }
+    const aYazar = (a.yazar || (a as any).bölümYazarı) as string;
+    const bYazar = (b.yazar || (b as any).bölümYazarı) as string;
     if (sortBy === 'yazar') {
-      const yazarA = a.yazar || '';
-      const yazarB = b.yazar || '';
-      return yazarA.localeCompare(yazarB);
+      return aYazar?.localeCompare(bYazar || '') || 0;
     }
+    const aYayinYili = (a as any).yayınYılı || (a as any).basımYılı;
+    const bYayinYili = (b as any).yayınYılı || (b as any).basımYılı;
     if (sortBy === 'yayınYılı') {
-      // Yayın yılı yoksa, boş string olarak kabul et
-      const yilA = (a as any).yayınYılı || (a as any).basımYılı || '';
-      const yilB = (b as any).yayınYılı || (b as any).basımYılı || '';
-      return yilA.localeCompare(yilB);
+      return String(aYayinYili)?.localeCompare(String(bYayinYili) || '') || 0;
     }
+    const aEserAdi = (a as any).eserAdı || (a as any).makaleAdı || (a as any).bölümAdı;
+    const bEserAdi = (b as any).eserAdı || (b as any).makaleAdı || (b as any).bölümAdı;
     if (sortBy === 'eserAdı') {
-      const eserA = (a as any).eserAdı || (a as any).makaleAdı || '';
-      const eserB = (b as any).eserAdı || (b as any).makaleAdı || '';
-      return eserA.localeCompare(eserB);
+      return aEserAdi?.localeCompare(bEserAdi || '') || 0;
     }
     return 0;
   });
 
   return (
     <div className="container">
-      <a href="/">Anasayfa</a>
+      <Link href="/">Anasayfa</Link>
       <h1>R-kod Arşivi</h1>
 
       {/* Kaynak Ekleme Formu */}
@@ -617,9 +616,9 @@ export default function RCodePage() {
             {sortedNotes.map((note) => (
               <tr key={note.id}>
                 <td>{note.rKod}</td>
-                <td>{note.yazar || note.bölümYazarı}</td>
-                <td>{note.yayınYılı || note.basımYılı}</td>
-                <td>{note.eserAdı || note.makaleAdı || note.bölümAdı}</td>
+                <td>{note.yazar || (note as any).bölümYazarı}</td>
+                <td>{note.yayınYılı || (note as any).basımYılı}</td>
+                <td>{note.eserAdı || (note as any).makaleAdı || (note as any).bölümAdı}</td>
                 <td>
                   <button onClick={() => handleDelete(note.id)}>Sil</button>
                   <button>Aç</button>
