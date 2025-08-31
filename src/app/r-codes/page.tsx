@@ -386,7 +386,15 @@ type Note = {
   metin: string;
   sayfa?: string;
   anahtarKelimeler: string[];
+  yayınYılı?: string;
+  basımYılı?: string;
+  bölümYazarı?: string;
+  makaleAdı?: string;
+  bölümAdı?: string;
+  eserAdı?: string;
 };
+
+type SortKey = 'rKod' | 'yazar' | 'yayınYılı' | 'eserAdı';
 
 export default function RCodePage() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -397,7 +405,7 @@ export default function RCodePage() {
     kitapBölümü: { eserAdı: '', editör: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', bölümAdı: '', bölümYazarı: '', sayfaAralığı: '' },
     makale: { makaleAdı: '', yazar: '', yayınlandığıDergi: '', yayınYılı: '', sayfaAralığı: '', doi: '' }
   });
-  const [sortBy, setSortBy] = useState('rKod');
+  const [sortBy, setSortBy] = useState<SortKey>('rKod');
 
   useEffect(() => {
     fetchNotes();
@@ -493,20 +501,20 @@ export default function RCodePage() {
     if (sortBy === 'rKod') {
       return a.rKod.localeCompare(b.rKod);
     }
-    const aYazar = (a.yazar || (a as any).bölümYazarı) as string;
-    const bYazar = (b.yazar || (b as any).bölümYazarı) as string;
+    const aYazar = a.yazar || (a as any).bölümYazarı || '';
+    const bYazar = b.yazar || (b as any).bölümYazarı || '';
     if (sortBy === 'yazar') {
-      return aYazar?.localeCompare(bYazar || '') || 0;
+      return aYazar.localeCompare(bYazar);
     }
-    const aYayinYili = (a as any).yayınYılı || (a as any).basımYılı;
-    const bYayinYili = (b as any).yayınYılı || (b as any).basımYılı;
+    const aYayinYili = (a as any).yayınYılı || (a as any).basımYılı || '';
+    const bYayinYili = (b as any).yayınYılı || (b as any).basımYılı || '';
     if (sortBy === 'yayınYılı') {
-      return String(aYayinYili)?.localeCompare(String(bYayinYili) || '') || 0;
+      return String(aYayinYili).localeCompare(String(bYayinYili));
     }
-    const aEserAdi = (a as any).eserAdı || (a as any).makaleAdı || (a as any).bölümAdı;
-    const bEserAdi = (b as any).eserAdı || (b as any).makaleAdı || (b as any).bölümAdı;
+    const aEserAdi = (a as any).eserAdı || (a as any).makaleAdı || (a as any).bölümAdı || '';
+    const bEserAdi = (b as any).eserAdı || (b as any).makaleAdı || (b as any).bölümAdı || '';
     if (sortBy === 'eserAdı') {
-      return aEserAdi?.localeCompare(bEserAdi || '') || 0;
+      return aEserAdi.localeCompare(bEserAdi);
     }
     return 0;
   });
@@ -616,9 +624,9 @@ export default function RCodePage() {
             {sortedNotes.map((note) => (
               <tr key={note.id}>
                 <td>{note.rKod}</td>
-                <td>{note.yazar || (note as any).bölümYazarı}</td>
-                <td>{note.yayınYılı || (note as any).basımYılı}</td>
-                <td>{note.eserAdı || (note as any).makaleAdı || (note as any).bölümAdı}</td>
+                <td>{note.yazar || note.bölümYazarı}</td>
+                <td>{note.yayınYılı || note.basımYılı}</td>
+                <td>{note.eserAdı || note.makaleAdı || note.bölümAdı}</td>
                 <td>
                   <button onClick={() => handleDelete(note.id)}>Sil</button>
                   <button>Aç</button>
