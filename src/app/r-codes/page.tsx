@@ -429,6 +429,15 @@ export default function Dashboard() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    let extraData = {};
+    if (sourceType === 'Kitap') {
+        extraData = newNote.kitap;
+    } else if (sourceType === 'KitapBölümü') {
+        extraData = newNote.kitapBölümü;
+    } else if (sourceType === 'Makale') {
+        extraData = newNote.makale;
+    }
+
     const noteData = {
         type: sourceType,
         rKod: newNote.rKod,
@@ -436,7 +445,7 @@ export default function Dashboard() {
         fKod: newNote.fKod,
         metin: newNote.metin,
         anahtarKelimeler: newNote.anahtarKelimeler.split(',').map(kw => kw.trim()),
-        ...newNote[sourceType.replace(/\s+/g, '') as keyof typeof newNote]
+        ...extraData
     };
 
     const res = await fetch('/api/notes', {
