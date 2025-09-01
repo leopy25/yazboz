@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import React from 'react';
 import Link from 'next/link';
 
-// C-kodları ve disiplinleri içeren liste
 const C_CODE_DISCIPLINES = [
     { code: 'C1000000', discipline: 'Humanities' },
     { code: 'C1100000', discipline: 'Performing arts' },
@@ -401,7 +400,7 @@ export default function RCodePage() {
   const [sourceType, setSourceType] = useState('Kitap');
   const [newNote, setNewNote] = useState({
     rKod: '', cKod: [] as string[], fKod: '', metin: '', anahtarKelimeler: '',
-    kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', sayfa: '' },
+    kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '' },
     kitapBölümü: { eserAdı: '', editör: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', bölümAdı: '', bölümYazarı: '', sayfaAralığı: '' },
     makale: { makaleAdı: '', yazar: '', yayınlandığıDergi: '', yayınYılı: '', sayfaAralığı: '', doi: '' }
   });
@@ -468,7 +467,7 @@ export default function RCodePage() {
       alert('Not başarıyla kaydedildi!');
       setNewNote({
         rKod: '', cKod: [] as string[], fKod: '', metin: '', anahtarKelimeler: '',
-        kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', sayfa: '' },
+        kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '' },
         kitapBölümü: { eserAdı: '', editör: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', bölümAdı: '', bölümYazarı: '', sayfaAralığı: '' },
         makale: { makaleAdı: '', yazar: '', yayınlandığıDergi: '', yayınYılı: '', sayfaAralığı: '', doi: '' }
       });

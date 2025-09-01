@@ -1,10 +1,8 @@
 import Redis from 'ioredis';
 import { NextResponse } from 'next/server';
 
-// Ortam değişkeninden Redis URL'ini al
 const redis = new Redis(process.env.REDIS_URL);
 
-// Yardımcı fonksiyon: R-kod oluşturma
 function generateRCode() {
   const now = new Date();
   const gg = String(now.getDate()).padStart(2, '0');
@@ -15,13 +13,11 @@ function generateRCode() {
   return `R${gg}${aa}${yy}-${ss}${dd}`;
 }
 
-// POST isteği: Yeni bir not kaydetmek için
 export async function POST(request) {
   try {
     const data = await request.json();
     let rKod = data.rKod;
 
-    // Eğer R-kod boşsa, otomatik olarak oluştur
     if (!rKod) {
       rKod = generateRCode();
     }
@@ -31,7 +27,7 @@ export async function POST(request) {
       type: data.type,
       rKod,
       cKod: data.cKod,
-      fKod: data.fKod,
+      fKod: '', // F-kod değeri burada boş bırakılıyor
       metin: data.metin,
       kaynakAdı: data.kaynakAdı,
       yazar: data.yazar,
@@ -48,7 +44,6 @@ export async function POST(request) {
   }
 }
 
-// GET isteği: Tüm notları çekmek için
 export async function GET() {
   try {
     const allNotes = await redis.hgetall('notes');
@@ -60,7 +55,6 @@ export async function GET() {
   }
 }
 
-// DELETE isteği: Bir notu silmek için
 export async function DELETE(request) {
   try {
     const { id } = await request.json();
