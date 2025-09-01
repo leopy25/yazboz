@@ -468,7 +468,7 @@ export default function RCodePage() {
         rKod: '', cKod: [] as string[], metin: '', anahtarKelimeler: '',
         kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', sayfa: '' },
         kitapBölümü: { eserAdı: '', editör: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', bölümAdı: '', bölümYazarı: '', sayfaAralığı: '' },
-        makale: { makaleAdı: '', yazar: '', yayınlandığı Dergi: '', yayın Yılı: '', sayfaAralığı: '', doi: '' }
+        makale: { makaleAdı: '', yazar: '', yayınlandığıDergi: '', yayınYılı: '', sayfaAralığı: '', doi: '' }
       });
       fetchNotes();
     } else {
@@ -555,7 +555,7 @@ export default function RCodePage() {
         <input type="text" placeholder="R-kod (Boş bırakırsanız otomatik atanır)" value={newNote.rKod} onChange={e => handleFieldChange('genel', 'rKod', e.target.value)} />
         
         <div>
-          <label>C-kod:</label>
+          <label>C-kodlar:</label>
           <div className="flex flex-col border rounded p-2 max-h-48 overflow-y-auto">
             {C_CODE_DISCIPLINES.map(item => (
               <label key={item.code} className="flex items-center space-x-2">
@@ -570,7 +570,7 @@ export default function RCodePage() {
             ))}
           </div>
         </div>
-        
+
         {/* Kaynak Tipine Göre Alanlar */}
         {sourceType === 'Kitap' && (
           <div>
