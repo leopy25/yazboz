@@ -403,6 +403,7 @@ type KitapNote = Note & {
   yayınevi: string;
   basıldığıYer: string;
   isbn: string;
+  sayfa: string;
 };
 
 // Kitap Bölümü için özel tipi tanımla
@@ -435,7 +436,7 @@ export default function RCodePage() {
   const [sourceType, setSourceType] = useState('Kitap');
   const [newNote, setNewNote] = useState({
     rKod: '', cKod: '', fKod: '', metin: '', anahtarKelimeler: '',
-    kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '' },
+    kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', sayfa: '' },
     kitapBölümü: { eserAdı: '', editör: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', bölümAdı: '', bölümYazarı: '', sayfaAralığı: '' },
     makale: { makaleAdı: '', yazar: '', yayınlandığıDergi: '', yayınYılı: '', sayfaAralığı: '', doi: '' }
   });
@@ -502,7 +503,7 @@ export default function RCodePage() {
       alert('Not başarıyla kaydedildi!');
       setNewNote({
         rKod: '', cKod: '', fKod: '', metin: '', anahtarKelimeler: '',
-        kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '' },
+        kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', sayfa: '' },
         kitapBölümü: { eserAdı: '', editör: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', bölümAdı: '', bölümYazarı: '', sayfaAralığı: '' },
         makale: { makaleAdı: '', yazar: '', yayınlandığıDergi: '', yayınYılı: '', sayfaAralığı: '', doi: '' }
       });
@@ -564,7 +565,7 @@ export default function RCodePage() {
         <h2>Kaynak Bilgilerini Girin</h2>
         <div>
           <label>Kaynak Tipi:</label>
-          <select value={sourceType} onChange={handleSourceChange}>
+          <select value={sourceType} onChange={e => setSourceType(e.target.value)}>
             <option value="Kitap">Kitap</option>
             <option value="KitapBölümü">Kitap Bölümü</option>
             <option value="Makale">Bilimsel Makale</option>
@@ -596,6 +597,7 @@ export default function RCodePage() {
             <input type="text" placeholder="Yayınevi" value={newNote.kitap.yayınevi} onChange={e => handleFieldChange('kitap', 'yayınevi', e.target.value)} />
             <input type="text" placeholder="Basıldığı Yer" value={newNote.kitap.basıldığıYer} onChange={e => handleFieldChange('kitap', 'basıldığıYer', e.target.value)} />
             <input type="text" placeholder="ISBN" value={newNote.kitap.isbn} onChange={e => handleFieldChange('kitap', 'isbn', e.target.value)} />
+            <input type="text" placeholder="Sayfa" value={newNote.kitap.sayfa} onChange={e => handleFieldChange('kitap', 'sayfa', e.target.value)} />
           </div>
         )}
 
@@ -636,7 +638,7 @@ export default function RCodePage() {
         <h2>Kayıtlı R-kodlar</h2>
         <div>
           <label>Sırala:</label>
-          <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
+          <select value={sortBy} onChange={e => setSortBy(e.target.value as SortKey)}>
             <option value="rKod">R-koda Göre</option>
             <option value="yazar">Yazar Adına Göre</option>
             <option value="yayınYılı">Yayın Yılına Göre</option>
