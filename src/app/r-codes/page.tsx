@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import React from 'react';
 import Link from 'next/link';
 
-// C-kodları ve disiplinleri içeren liste
 const C_CODE_DISCIPLINES = [
     { code: 'C1000000', discipline: 'Humanities' },
     { code: 'C1100000', discipline: 'Performing arts' },
@@ -497,9 +496,21 @@ export default function RCodePage() {
     }
   };
 
-  const handleCcodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedOptions = Array.from(e.target.selectedOptions).map(option => option.value);
-    setNewNote(prev => ({ ...prev, cKod: selectedOptions }));
+  const handleCcodeChange = (code: string) => {
+    setNewNote(prev => {
+      const isSelected = prev.cKod.includes(code);
+      if (isSelected) {
+        return {
+          ...prev,
+          cKod: prev.cKod.filter(c => c !== code)
+        };
+      } else {
+        return {
+          ...prev,
+          cKod: [...prev.cKod, code]
+        };
+      }
+    });
   };
 
   const getSortableValue = (note: Note, key: SortKey) => {
@@ -546,15 +557,20 @@ export default function RCodePage() {
         
         <div>
           <label>C-kod:</label>
-          <select multiple value={newNote.cKod} onChange={handleCcodeChange}>
+          <div className="flex flex-wrap border rounded p-2">
             {C_CODE_DISCIPLINES.map(item => (
-              <option key={item.code} value={item.code}>
+              <span
+                key={item.code}
+                onClick={() => handleCcodeChange(item.code)}
+                className={`cursor-pointer px-2 py-1 m-1 rounded border ${newNote.cKod.includes(item.code) ? 'bg-blue-500 text-white border-blue-600' : 'bg-gray-200 text-gray-800 border-gray-300'}`}
+              >
                 {item.code} - {item.discipline}
-              </option>
+              </span>
             ))}
-          </select>
+          </div>
         </div>
-        <input type="text" placeholder="F-kod" value={newNote.fKod} onChange={e => handleFieldChange('genel', 'fKod', e.target.value)} />
+        
+        {/* F-kod kaldırıldı */}
 
         {/* Kaynak Tipine Göre Alanlar */}
         {sourceType === 'Kitap' && (
