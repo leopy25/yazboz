@@ -375,6 +375,7 @@ const C_CODE_DISCIPLINES = [
     { code: 'C5000000', discipline: 'Applied science' }
 ];
 
+// Note tipi, zorunlu alanları ve isteğe bağlı olanları belirtir
 type Note = {
   id: string;
   type: string;
@@ -392,6 +393,39 @@ type Note = {
   makaleAdı?: string;
   bölümAdı?: string;
   eserAdı?: string;
+};
+
+// Kitap için özel tipi tanımla
+type KitapNote = Note & {
+  eserAdı: string;
+  yazar: string;
+  basımYılı: string;
+  yayınevi: string;
+  basıldığıYer: string;
+  isbn: string;
+};
+
+// Kitap Bölümü için özel tipi tanımla
+type KitapBolumuNote = Note & {
+  eserAdı: string;
+  editör: string;
+  basımYılı: string;
+  yayınevi: string;
+  basıldığıYer: string;
+  isbn: string;
+  bölümAdı: string;
+  bölümYazarı: string;
+  sayfaAralığı: string;
+};
+
+// Makale için özel tipi tanımla
+type MakaleNote = Note & {
+  makaleAdı: string;
+  yazar: string;
+  yayınlandığıDergi: string;
+  yayınYılı: string;
+  sayfaAralığı: string;
+  doi: string;
 };
 
 type SortKey = 'rKod' | 'yazar' | 'yayınYılı' | 'eserAdı';
@@ -439,7 +473,7 @@ export default function RCodePage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    let specificSourceData = {};
+    let specificSourceData: object = {};
     if (sourceType === 'Kitap') {
         specificSourceData = newNote.kitap;
     } else if (sourceType === 'KitapBölümü') {
@@ -497,26 +531,25 @@ export default function RCodePage() {
     }
   };
 
+  const getSortableValue = (note: Note, key: SortKey) => {
+    switch(key) {
+      case 'rKod':
+        return note.rKod;
+      case 'yazar':
+        return note.yazar || note.bölümYazarı || '';
+      case 'yayınYılı':
+        return note.yayınYılı || note.basımYılı || '';
+      case 'eserAdı':
+        return note.eserAdı || note.makaleAdı || note.bölümAdı || '';
+      default:
+        return '';
+    }
+  };
+
   const sortedNotes = [...notes].sort((a, b) => {
-    if (sortBy === 'rKod') {
-      return a.rKod.localeCompare(b.rKod);
-    }
-    const aYazar = a.yazar || (a as any).bölümYazarı || '';
-    const bYazar = b.yazar || (b as any).bölümYazarı || '';
-    if (sortBy === 'yazar') {
-      return aYazar.localeCompare(bYazar);
-    }
-    const aYayinYili = (a as any).yayınYılı || (a as any).basımYılı || '';
-    const bYayinYili = (b as any).yayınYılı || (b as any).basımYılı || '';
-    if (sortBy === 'yayınYılı') {
-      return String(aYayinYili).localeCompare(String(bYayinYili));
-    }
-    const aEserAdi = (a as any).eserAdı || (a as any).makaleAdı || (a as any).bölümAdı || '';
-    const bEserAdi = (b as any).eserAdı || (b as any).makaleAdı || (b as any).bölümAdı || '';
-    if (sortBy === 'eserAdı') {
-      return aEserAdi.localeCompare(bEserAdi);
-    }
-    return 0;
+    const aVal = getSortableValue(a, sortBy);
+    const bVal = getSortableValue(b, sortBy);
+    return String(aVal).localeCompare(String(bVal));
   });
 
   return (
