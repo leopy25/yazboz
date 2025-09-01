@@ -379,7 +379,7 @@ type Note = {
   id: string;
   type: string;
   rKod: string;
-  cKod: string[]; // cKod artık bir string dizisi
+  cKod: string[];
   fKod: string;
   kaynakAdı?: string;
   yazar?: string;
@@ -467,7 +467,7 @@ export default function RCodePage() {
     if (res.ok) {
       alert('Not başarıyla kaydedildi!');
       setNewNote({
-        rKod: '', cKod: [] as string[], fKod: '', metin: '', sayfa: '', anahtarKelimeler: '',
+        rKod: '', cKod: [] as string[], fKod: '', metin: '', anahtarKelimeler: '',
         kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', sayfa: '' },
         kitapBölümü: { eserAdı: '', editör: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', bölümAdı: '', bölümYazarı: '', sayfaAralığı: '' },
         makale: { makaleAdı: '', yazar: '', yayınlandığıDergi: '', yayınYılı: '', sayfaAralığı: '', doi: '' }
@@ -479,7 +479,7 @@ export default function RCodePage() {
   };
 
   const handleSourceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSourceType(e.target.value);
+    setSourceType(e.target.value as 'Kitap' | 'KitapBölümü' | 'Makale');
   };
 
   const handleFieldChange = (source: string, field: string, value: string) => {
@@ -535,7 +535,7 @@ export default function RCodePage() {
         <h2>Kaynak Bilgilerini Girin</h2>
         <div>
           <label>Kaynak Tipi:</label>
-          <select value={sourceType} onChange={e => setSourceType(e.target.value as 'Kitap' | 'KitapBölümü' | 'Makale')}>
+          <select value={sourceType} onChange={handleSourceChange}>
             <option value="Kitap">Kitap</option>
             <option value="KitapBölümü">Kitap Bölümü</option>
             <option value="Makale">Bilimsel Makale</option>
