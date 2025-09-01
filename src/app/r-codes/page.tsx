@@ -380,7 +380,6 @@ type Note = {
   type: string;
   rKod: string;
   cKod: string[];
-  fKod: string;
   kaynakAdı?: string;
   yazar?: string;
   metin: string;
@@ -569,8 +568,6 @@ export default function RCodePage() {
             ))}
           </div>
         </div>
-        
-        {/* F-kod kaldırıldı */}
 
         {/* Kaynak Tipine Göre Alanlar */}
         {sourceType === 'Kitap' && (
