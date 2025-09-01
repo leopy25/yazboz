@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import React from 'react';
 import Link from 'next/link';
 
+// C-kodları ve disiplinleri içeren liste
 const C_CODE_DISCIPLINES = [
     { code: 'C1000000', discipline: 'Humanities' },
     { code: 'C1100000', discipline: 'Performing arts' },
@@ -399,7 +400,7 @@ export default function RCodePage() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [sourceType, setSourceType] = useState('Kitap');
   const [newNote, setNewNote] = useState({
-    rKod: '', cKod: [] as string[], fKod: '', metin: '', anahtarKelimeler: '',
+    rKod: '', cKod: [] as string[], metin: '', anahtarKelimeler: '',
     kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', sayfa: '' },
     kitapBölümü: { eserAdı: '', editör: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', bölümAdı: '', bölümYazarı: '', sayfaAralığı: '' },
     makale: { makaleAdı: '', yazar: '', yayınlandığıDergi: '', yayınYılı: '', sayfaAralığı: '', doi: '' }
@@ -451,7 +452,6 @@ export default function RCodePage() {
         type: sourceType,
         rKod: newNote.rKod,
         cKod: newNote.cKod,
-        fKod: newNote.fKod,
         metin: newNote.metin,
         anahtarKelimeler: newNote.anahtarKelimeler.split(',').map(kw => kw.trim()),
         ...specificSourceData
@@ -466,7 +466,7 @@ export default function RCodePage() {
     if (res.ok) {
       alert('Not başarıyla kaydedildi!');
       setNewNote({
-        rKod: '', cKod: [] as string[], fKod: '', metin: '', anahtarKelimeler: '',
+        rKod: '', cKod: [] as string[], metin: '', anahtarKelimeler: '',
         kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', sayfa: '' },
         kitapBölümü: { eserAdı: '', editör: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', bölümAdı: '', bölümYazarı: '', sayfaAralığı: '' },
         makale: { makaleAdı: '', yazar: '', yayınlandığıDergi: '', yayınYılı: '', sayfaAralığı: '', doi: '' }
