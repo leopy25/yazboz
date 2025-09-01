@@ -375,12 +375,11 @@ const C_CODE_DISCIPLINES = [
     { code: 'C5000000', discipline: 'Applied science' }
 ];
 
-// Note tipi, zorunlu alanları ve isteğe bağlı olanları belirtir
 type Note = {
   id: string;
   type: string;
   rKod: string;
-  cKod: string;
+  cKod: string[]; // cKod artık bir string dizisi
   fKod: string;
   kaynakAdı?: string;
   yazar?: string;
@@ -395,47 +394,13 @@ type Note = {
   eserAdı?: string;
 };
 
-// Kitap için özel tipi tanımla
-type KitapNote = Note & {
-  eserAdı: string;
-  yazar: string;
-  basımYılı: string;
-  yayınevi: string;
-  basıldığıYer: string;
-  isbn: string;
-  sayfa: string;
-};
-
-// Kitap Bölümü için özel tipi tanımla
-type KitapBolumuNote = Note & {
-  eserAdı: string;
-  editör: string;
-  basımYılı: string;
-  yayınevi: string;
-  basıldığıYer: string;
-  isbn: string;
-  bölümAdı: string;
-  bölümYazarı: string;
-  sayfaAralığı: string;
-};
-
-// Makale için özel tipi tanımla
-type MakaleNote = Note & {
-  makaleAdı: string;
-  yazar: string;
-  yayınlandığıDergi: string;
-  yayınYılı: string;
-  sayfaAralığı: string;
-  doi: string;
-};
-
 type SortKey = 'rKod' | 'yazar' | 'yayınYılı' | 'eserAdı';
 
 export default function RCodePage() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [sourceType, setSourceType] = useState('Kitap');
   const [newNote, setNewNote] = useState({
-    rKod: '', cKod: '', fKod: '', metin: '', anahtarKelimeler: '',
+    rKod: '', cKod: [] as string[], fKod: '', metin: '', anahtarKelimeler: '',
     kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', sayfa: '' },
     kitapBölümü: { eserAdı: '', editör: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', bölümAdı: '', bölümYazarı: '', sayfaAralığı: '' },
     makale: { makaleAdı: '', yazar: '', yayınlandığıDergi: '', yayınYılı: '', sayfaAralığı: '', doi: '' }
@@ -502,7 +467,7 @@ export default function RCodePage() {
     if (res.ok) {
       alert('Not başarıyla kaydedildi!');
       setNewNote({
-        rKod: '', cKod: '', fKod: '', metin: '', anahtarKelimeler: '',
+        rKod: '', cKod: [] as string[], fKod: '', metin: '', sayfa: '', anahtarKelimeler: '',
         kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', sayfa: '' },
         kitapBölümü: { eserAdı: '', editör: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', bölümAdı: '', bölümYazarı: '', sayfaAralığı: '' },
         makale: { makaleAdı: '', yazar: '', yayınlandığıDergi: '', yayınYılı: '', sayfaAralığı: '', doi: '' }
@@ -530,6 +495,11 @@ export default function RCodePage() {
         }
       }));
     }
+  };
+
+  const handleCcodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedOptions = Array.from(e.target.selectedOptions).map(option => option.value);
+    setNewNote(prev => ({ ...prev, cKod: selectedOptions }));
   };
 
   const getSortableValue = (note: Note, key: SortKey) => {
@@ -565,7 +535,7 @@ export default function RCodePage() {
         <h2>Kaynak Bilgilerini Girin</h2>
         <div>
           <label>Kaynak Tipi:</label>
-          <select value={sourceType} onChange={e => setSourceType(e.target.value)}>
+          <select value={sourceType} onChange={e => setSourceType(e.target.value as 'Kitap' | 'KitapBölümü' | 'Makale')}>
             <option value="Kitap">Kitap</option>
             <option value="KitapBölümü">Kitap Bölümü</option>
             <option value="Makale">Bilimsel Makale</option>
@@ -576,8 +546,7 @@ export default function RCodePage() {
         
         <div>
           <label>C-kod:</label>
-          <select value={newNote.cKod} onChange={e => handleFieldChange('genel', 'cKod', e.target.value)}>
-            <option value="">C-kod Seçin...</option>
+          <select multiple value={newNote.cKod} onChange={handleCcodeChange}>
             {C_CODE_DISCIPLINES.map(item => (
               <option key={item.code} value={item.code}>
                 {item.code} - {item.discipline}
