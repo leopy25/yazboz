@@ -569,6 +569,8 @@ export default function RCodePage() {
           </div>
         </div>
 
+        {/* F-kod kaldırıldı */}
+
         {/* Kaynak Tipine Göre Alanlar */}
         {sourceType === 'Kitap' && (
           <div>
