@@ -495,19 +495,13 @@ export default function RCodePage() {
     }
   };
 
-  const handleCcodeChange = (code: string) => {
+  const handleCcodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value, checked } = e.target;
     setNewNote(prev => {
-      const isSelected = prev.cKod.includes(code);
-      if (isSelected) {
-        return {
-          ...prev,
-          cKod: prev.cKod.filter(c => c !== code)
-        };
+      if (checked) {
+        return { ...prev, cKod: [...prev.cKod, value] };
       } else {
-        return {
-          ...prev,
-          cKod: [...prev.cKod, code]
-        };
+        return { ...prev, cKod: prev.cKod.filter(c => c !== value) };
       }
     });
   };
@@ -555,16 +549,18 @@ export default function RCodePage() {
         <input type="text" placeholder="R-kod (Boş bırakırsanız otomatik atanır)" value={newNote.rKod} onChange={e => handleFieldChange('genel', 'rKod', e.target.value)} />
         
         <div>
-          <label>C-kod:</label>
-          <div className="flex flex-wrap border rounded p-2">
+          <label>C-kodlar:</label>
+          <div className="flex flex-col border rounded p-2 max-h-48 overflow-y-auto">
             {C_CODE_DISCIPLINES.map(item => (
-              <span
-                key={item.code}
-                onClick={() => handleCcodeChange(item.code)}
-                className={`cursor-pointer px-2 py-1 m-1 rounded border ${newNote.cKod.includes(item.code) ? 'bg-blue-500 text-white border-blue-600' : 'bg-gray-200 text-gray-800 border-gray-300'}`}
-              >
-                {item.code} - {item.discipline}
-              </span>
+              <label key={item.code} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  value={item.code}
+                  checked={newNote.cKod.includes(item.code)}
+                  onChange={handleCcodeChange}
+                />
+                <span>{item.code} - {item.discipline}</span>
+              </label>
             ))}
           </div>
         </div>
