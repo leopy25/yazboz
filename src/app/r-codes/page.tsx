@@ -402,7 +402,7 @@ export default function RCodePage() {
     rKod: '', cKod: [] as string[], metin: '', anahtarKelimeler: '',
     kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', sayfa: '' },
     kitapBölümü: { eserAdı: '', editör: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', bölümAdı: '', bölümYazarı: '', sayfaAralığı: '' },
-    makale: { makaleAdı: '', yazar: '', yayınlandığı Dergi: '', yayın Yılı: '', sayfaAralığı: '', doi: '' }
+    makale: { makaleAdı: '', yazar: '', yayınlandığıDergi: '', yayınYılı: '', sayfaAralığı: '', doi: '' }
   });
   const [sortBy, setSortBy] = useState<SortKey>('rKod');
 
@@ -468,7 +468,7 @@ export default function RCodePage() {
         rKod: '', cKod: [] as string[], metin: '', anahtarKelimeler: '',
         kitap: { eserAdı: '', yazar: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', sayfa: '' },
         kitapBölümü: { eserAdı: '', editör: '', basımYılı: '', yayınevi: '', basıldığıYer: '', isbn: '', bölümAdı: '', bölümYazarı: '', sayfaAralığı: '' },
-        makale: { makaleAdı: '', yazar: '', yayınlandığı Dergi: '', yayın Yılı: '', sayfaAralığı: '', doi: '' }
+        makale: { makaleAdı: '', yazar: '', yayınlandığıDergi: '', yayınYılı: '', sayfaAralığı: '', doi: '' }
       });
       fetchNotes();
     } else {
@@ -622,39 +622,3 @@ export default function RCodePage() {
         <h2>Kayıtlı R-kodlar</h2>
         <div>
           <label>Sırala:</label>
-          <select value={sortBy} onChange={e => setSortBy(e.target.value as SortKey)}>
-            <option value="rKod">R-koda Göre</option>
-            <option value="yazar">Yazar Adına Göre</option>
-            <option value="yayınYılı">Yayın Yılına Göre</option>
-            <option value="eserAdı">Eser Adına Göre</option>
-          </select>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>R-Kod</th>
-              <th>Yazar Adı</th>
-              <th>Yayın Yılı</th>
-              <th>Eser Adı</th>
-              <th>İşlemler</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedNotes.map((note) => (
-              <tr key={note.id}>
-                <td>{note.rKod}</td>
-                <td>{note.yazar || note.bölümYazarı}</td>
-                <td>{note.yayınYılı || note.basımYılı}</td>
-                <td>{note.eserAdı || note.makaleAdı || note.bölümAdı}</td>
-                <td>
-                  <button onClick={() => handleDelete(note.id)}>Sil</button>
-                  <button>Aç</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
